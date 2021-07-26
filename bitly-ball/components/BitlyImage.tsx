@@ -1,4 +1,6 @@
 import useSWR from 'swr'
+import Image from 'next/image'
+
 
 interface WebsiteSnapshotResponse {
   url: string;
@@ -39,10 +41,10 @@ const BitlyImage: React.FC<BitlyImageProps> = ({url}) => {
 
     if (image) {
         return (
-            <img
+            <Image
                 className="object-contain rounded-lg rounded-t-none"
                 alt="Bitly Image Result"
-                style={{ pointerEvents: "none" }}
+                layout="fill"
                 src={image}
             />
         );
