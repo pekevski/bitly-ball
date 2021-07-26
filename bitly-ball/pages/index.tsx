@@ -1,6 +1,8 @@
 import Head from "next/head";
 import Image from "next/image";
 import React, { useState } from "react";
+import useSWR from 'swr'
+import BitlyImage from '../components/BitlyImage';
 
 interface WebsiteSnapshotResponse {
   url: string;
@@ -8,33 +10,15 @@ interface WebsiteSnapshotResponse {
   success: boolean;
 }
 
+
 export default function Home() {
   const [url, setUrl] = useState<string>("");
-  const [image, setImage] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
-  const [result, setResult] = useState<boolean>(false);
+
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     url.trim();
-    setLoading(true);
-    console.log("Checking url.", url);
-    const response: Response = await fetch(
-      `${process.env.NEXT_PUBLIC_SNAPSHOT_LAMBDA_ENDPOINT}?url=https://bit.ly/${url}`
-    );
-
-    console.log(response);
-    const json: WebsiteSnapshotResponse = await response.json();
-
-    setResult(json.success);
-
-    if (json.image) {
-      setImage("data:image/jpeg;charset=utl-8;base64, " + json.image);
-    } else {
-      setImage("");
-    }
-
-    setLoading(false);
+    setUrl(url);
   };
 
   return (
@@ -85,22 +69,10 @@ export default function Home() {
             </div>
           </div>
           <div className="border border-gray-200 rounded-lg rounded-t-none">
-            {loading ? (
-              <h1 style={{ height: "400px" }}>loading...</h1>
-            ) : image && image.length ? (
-              <img
-                className="object-contain rounded-lg rounded-t-none"
-                alt="Bitly Image Result"
-                style={{ pointerEvents: "none" }}
-                src={image}
-              />
-            ) : (
-              <h1 style={{ height: "400px" }}>enter an image</h1>
-            )}
+            <BitlyImage url={url} />
           </div>
         </div>
 
-        <h1>{result ? "HIT A BIT!" : "NO BIT"}</h1>
       </main>
 
       <footer className="flex items-center justify-center w-full h-24 border-t">

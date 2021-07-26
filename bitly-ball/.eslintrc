@@ -1,3 +1,7 @@
 {
-  "extends": ["next", "next/core-web-vitals"]
+  "extends": ["next", "next/core-web-vitals"],
+  // "rules": {
+  //   // turn off for client side <img />
+  //   "@next/next/no-img-element": "off"
+  // }
 }
