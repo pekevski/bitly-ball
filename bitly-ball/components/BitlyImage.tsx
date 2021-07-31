@@ -1,57 +1,59 @@
-import useSWR from 'swr'
-import Image from 'next/image'
+import Image from "next/image";
+import useSWR from "swr";
+import { ScreenshotResponse } from "../types/ScreenshotResponse";
+import { memo } from "react";
 
+const fetcher = (url: RequestInfo) => fetch(url).then((res) => res.json());
 
-interface WebsiteSnapshotResponse {
-  url: string;
-  image: string;
-  success: boolean;
-}
-
-
-const fetcher = (url: RequestInfo) => fetch(url).then((res) => res.json())
-
-function useBitlyImage(urlInput: string) {
+const useBitlyImage = (urlInput: string) => {
   const bitlyUrl: string = `https://bit.ly/${urlInput}`;
-  console.log("Checking url.", bitlyUrl);
-
-  const { data, error } = useSWR(`${process.env.NEXT_PUBLIC_SNAPSHOT_LAMBDA_ENDPOINT}?url=${bitlyUrl}`, fetcher)
+  
+  const { data, error } = useSWR<ScreenshotResponse, any>(
+    `${process.env.NEXT_PUBLIC_SNAPSHOT_LAMBDA_ENDPOINT}?url=${bitlyUrl}`,
+    fetcher,
+    { revalidateOnFocus: false, refreshWhenHidden: false }
+  );
 
   return {
     response: data,
-    isLoading: !error && !data,
-    isError: error
-  }
-}
+    loading: !error && !data,
+    error: error,
+  };
+};
 
 type BitlyImageProps = {
-    url: string
-}
- 
-const BitlyImage: React.FC<BitlyImageProps> = ({url}) => {
+  url: string;
+};
 
-    const { response, isLoading, isError } = useBitlyImage(url)
+const BitlyImage: React.FC<BitlyImageProps> = ({ url }) => {
+  const { response, loading, error } = useBitlyImage(url);
 
-    if (isLoading) return <h1>Loading...</h1>// <Spinner />
-    if (isError) return <h1>Error!</h1>
+  if (loading) return <h1>Loading...</h1>; // <Spinner />
+  if (error || !response) return <h1>Error!</h1>;
 
-    const success: boolean = response.success;
-    const image: string | undefined = (response.image && response.image.length) ? `data:image/jpeg;charset=utl-8;base64,${response.image}` : undefined;
-    const bitlyUrl: string = response.url;
+  const success: boolean = response.success;
+  const image: string | undefined =
+    response.image && response.image.length
+      ? `data:image/jpeg;charset=utl-8;base64,${response.image}`
+      : undefined;
+  const bitlyUrl: string = response.url;
 
-    if (image) {
-        return (
-            <Image
-                className="object-contain rounded-lg rounded-t-none"
-                alt="Bitly Image Result"
-                layout="fill"
-                src={image}
-            />
-        );
-    } {
-        return <h1>No Image</h1>
-    }
+  if (image) {
+    return (
+      <div className="rounded-lg rounded-t-none">
+        <Image
+          className="object-contain"
+          alt="Bitly Image Result"
+          width="1000"
+          height="600"
+          src={image}
+        />
+      </div>
+    );
+  }
+  {
+    return <h1>No Image</h1>;
+  }
+};
 
-}
- 
-export default BitlyImage;
+export default memo(BitlyImage);

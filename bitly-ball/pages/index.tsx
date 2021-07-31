@@ -1,24 +1,21 @@
 import Head from "next/head";
-import Image from "next/image";
-import React, { useState } from "react";
-import useSWR from 'swr'
-import BitlyImage from '../components/BitlyImage';
-
-interface WebsiteSnapshotResponse {
-  url: string;
-  image: string;
-  success: boolean;
-}
+import React, { useEffect, useState } from "react";
+import BitlyImage from "../components/BitlyImage";
 
 
 export default function Home() {
+
+  const [textInput, setTextInput] = useState<string>("");
   const [url, setUrl] = useState<string>("");
 
-
-  const handleSubmit = async (event: React.FormEvent) => {
+  const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    url.trim();
-    setUrl(url);
+    console.log("setting url...");
+
+    if (textInput) {
+      textInput.trim();
+      setUrl(textInput);
+    }
   };
 
   return (
@@ -55,8 +52,8 @@ export default function Home() {
                       className="bg-gray-200 appearance-none border border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
                       id="inline-url"
                       type="text"
-                      value={url}
-                      onChange={(e) => setUrl(e.target.value)}
+                      value={textInput}
+                      onChange={(e) => setTextInput(e.target.value)}
                     />
                   </div>
                   <div className="sm:w-1/4">
@@ -72,7 +69,6 @@ export default function Home() {
             <BitlyImage url={url} />
           </div>
         </div>
-
       </main>
 
       <footer className="flex items-center justify-center w-full h-24 border-t">
