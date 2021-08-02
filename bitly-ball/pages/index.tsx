@@ -1,6 +1,7 @@
 import Head from "next/head";
 import React from "react";
 import Router from 'next/router'
+import BrowserWindow from "../components/BrowserWindow";
 
 
 export default function Home() {
@@ -18,21 +19,11 @@ export default function Home() {
       </Head>
 
       <main className="flex flex-col items-center justify-center w-full flex-1 px-20 text-center">
-        <h1 className="text-2xl">Bitly Ball</h1>
 
         <div className="m-6">
-          <div className="border border-b-0 rounded-b-none border-gray-200 rounded-lg">
-            <div className="flex p-1">
-              <div className="flex">
-                <div className="rounded-full m-0.5 bg-red-500 w-3 h-3"></div>
-                <div className="rounded-full m-0.5 bg-yellow-500 w-3 h-3"></div>
-                <div className="rounded-full m-0.5 bg-green-500 w-3 h-3"></div>
-              </div>
-            </div>
-          </div>
-          <div className="border border-gray-200 rounded-lg rounded-t-none">
+          <BrowserWindow>
             <button onClick={(e) => handleCreateRoom(e)}>Create Room</button>
-          </div>
+          </BrowserWindow>
         </div>
       </main>
 

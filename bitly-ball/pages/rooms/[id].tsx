@@ -1,20 +1,18 @@
 import Head from "next/head";
 import React, { useEffect, useState } from "react";
 import BitlyImage from "../../components/BitlyImage";
-import { useRouter } from 'next/router'
+import { useRouter } from "next/router";
 import { useStore } from "../../lib/Store";
+import BrowserWindow from "../../components/BrowserWindow";
 
-type RoomPageProps = {
-
-};
+type RoomPageProps = {};
 
 const RoomPage: React.FC<RoomPageProps> = (props) => {
-
-  const router = useRouter()
-  const query = router.query
+  const router = useRouter();
+  const query = router.query;
   const roomId = query.id as string;
-  
-  const { players } = useStore({ roomId })
+
+  const { players } = useStore({ roomId });
 
   const [textInput, setTextInput] = useState<string>("");
   const [url, setUrl] = useState<string>("");
@@ -40,45 +38,32 @@ const RoomPage: React.FC<RoomPageProps> = (props) => {
         <h1 className="text-2xl">Bitly Ball</h1>
 
         <div className="m-6">
-          <div className="border border-b-0 rounded-b-none border-gray-200 rounded-lg">
-            <div className="flex p-1">
-              <div className="flex">
-                <div className="rounded-full m-0.5 bg-red-500 w-3 h-3"></div>
-                <div className="rounded-full m-0.5 bg-yellow-500 w-3 h-3"></div>
-                <div className="rounded-full m-0.5 bg-green-500 w-3 h-3"></div>
-              </div>
+          <BrowserWindow>
+            {!url.length && <h1>Bitly Ball</h1>}
+            {!!url.length && <BitlyImage url={url} />}
 
-              <form className="w-full" onSubmit={(e) => handleSubmit(e)}>
-                <div className="flex items-center">
-                  <div className="sm:w-1/4">
-                    <label
-                      className="text-2xl block text-gray-500 font-bold sm:text-right mb-1 md:mb-0 pr-4"
-                      htmlFor="inline-url"
-                    >
-                      bit.ly/
-                    </label>
-                  </div>
-                  <div className="sm:w-2/4">
-                    <input
-                      className="bg-gray-200 appearance-none border border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
-                      id="inline-url"
-                      type="text"
-                      value={textInput}
-                      onChange={(e) => setTextInput(e.target.value)}
-                    />
-                  </div>
-                  <div className="sm:w-1/4">
-                    <button className="bg-blue-500 hover:bg-blue-400 text-white align-left font-bold py-1 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded">
-                      Check
-                    </button>
-                  </div>
-                </div>
-              </form>
-            </div>
-          </div>
-          <div className="border border-gray-200 rounded-lg rounded-t-none">
-            <BitlyImage url={url} />
-          </div>
+            <form className="m-5" onSubmit={(e) => handleSubmit(e)}>
+              <div className="flex w-full flex-nowrap items-stretch border border-gray-200 rounded-lg">
+                <label htmlFor="inline-url" className="font-bitlyTitle text-2xl text-center bg-transparent items-center justify-center p-3 border-r">
+                  bit.ly/
+                </label>
+                <input 
+                  id="inline-url"
+                  type="text" 
+                  placeholder="Aa" 
+                  className="px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white bg-white focus:outline-none w-full"
+                  value={textInput}
+                  onChange={(e) => setTextInput(e.target.value)}
+                  />
+                <button className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-1 px-4 hover:border-blue-500 rounded-r-lg">
+                  Check
+                </button>
+              </div>
+            </form>
+
+
+
+          </BrowserWindow>
         </div>
       </main>
 
@@ -94,6 +79,6 @@ const RoomPage: React.FC<RoomPageProps> = (props) => {
       </footer>
     </div>
   );
-}
+};
 
 export default RoomPage;

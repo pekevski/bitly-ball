@@ -6,6 +6,7 @@ import { memo } from "react";
 const fetcher = (url: RequestInfo) => fetch(url).then((res) => res.json());
 
 const useBitlyImage = (urlInput: string) => {
+  
   const bitlyUrl: string = `https://bit.ly/${urlInput}`;
   
   const { data, error } = useSWR<ScreenshotResponse, any>(
@@ -26,6 +27,7 @@ type BitlyImageProps = {
 };
 
 const BitlyImage: React.FC<BitlyImageProps> = ({ url }) => {
+
   const { response, loading, error } = useBitlyImage(url);
 
   if (loading) return <h1>Loading...</h1>; // <Spinner />
