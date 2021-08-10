@@ -1,82 +1,56 @@
 import Head from "next/head";
-import React, { useEffect, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import BitlyImage from "../../components/BitlyImage";
 import { useRouter } from "next/router";
-import { useStore } from "../../lib/Store";
+import { createPlayer, useStore } from "../../lib/Store";
 import BrowserWindow from "../../components/BrowserWindow";
+import TextInput from "../../components/TextInput";
+import Players from "../../components/Players";
 
 type RoomPageProps = {};
 
 const RoomPage: React.FC<RoomPageProps> = (props) => {
+  
   const router = useRouter();
   const query = router.query;
   const roomId = query.id as string;
-
-  const { players } = useStore({ roomId });
-
-  const [textInput, setTextInput] = useState<string>("");
+  
   const [url, setUrl] = useState<string>("");
-
-  const handleSubmit = (event: React.FormEvent) => {
+  const { players } = useStore({ roomId });
+  
+  const handleAddPlayer = async (event: React.FormEvent) => {
     event.preventDefault();
-    console.log("setting url...");
-
-    if (textInput) {
-      textInput.trim();
-      setUrl(textInput);
-    }
-  };
+    const player = await createPlayer("test101", roomId)
+  }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen py-2">
+    <div className="flex flex-col min-h-screen h-screen items-center">
       <Head>
         <title>Bitly Ball</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="flex flex-col items-center justify-center w-full flex-1 px-20 text-center">
-        <h1 className="text-2xl">Bitly Ball</h1>
-
-        <div className="m-6">
+      <main className="p-4 lg:p-10 h-full w-full">
           <BrowserWindow>
-            {!url.length && <h1>Bitly Ball</h1>}
-            {!!url.length && <BitlyImage url={url} />}
 
-            <form className="m-5" onSubmit={(e) => handleSubmit(e)}>
-              <div className="flex w-full flex-nowrap items-stretch border border-gray-200 rounded-lg">
-                <label htmlFor="inline-url" className="font-bitlyTitle text-2xl text-center bg-transparent items-center justify-center p-3 border-r">
-                  bit.ly/
-                </label>
-                <input 
-                  id="inline-url"
-                  type="text" 
-                  placeholder="Aa" 
-                  className="px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white bg-white focus:outline-none w-full"
-                  value={textInput}
-                  onChange={(e) => setTextInput(e.target.value)}
-                  />
-                <button className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-1 px-4 hover:border-blue-500 rounded-r-lg">
-                  Check
-                </button>
+            <div className="relative flex flex-row h-full">
+              <div className="flex-1 p-5 flex flex-col justify-center text-center">
+                <h1 className="font-bitlyTitle text-6xl pb-5">Bitly Ball</h1>
+                {!!url.length && <BitlyImage url={url} />}
+                <TextInput handleSubmit={setUrl} />
               </div>
-            </form>
 
-
-
-          </BrowserWindow>
-        </div>
+              <div className="relative rounded-br-lg overflow-y-hidden">
+                <div className="p-5 h-full overflow-y-auto bg-gray-50">
+                  <Players players={players} />
+                  <button onClick={(e) => handleAddPlayer(e)} className="w-full bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow">
+                    Add Player (Debug)
+                  </button>
+                </div>
+              </div>
+            </div>
+          </BrowserWindow> 
       </main>
-
-      <footer className="flex items-center justify-center w-full h-24 border-t">
-        <a
-          className="flex items-center justify-center"
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by Daniel
-        </a>
-      </footer>
     </div>
   );
 };

@@ -2,6 +2,7 @@ import Image from "next/image";
 import useSWR from "swr";
 import { ScreenshotResponse } from "../types/ScreenshotResponse";
 import { memo } from "react";
+import Loader from './Loader';
 
 const fetcher = (url: RequestInfo) => fetch(url).then((res) => res.json());
 
@@ -30,7 +31,11 @@ const BitlyImage: React.FC<BitlyImageProps> = ({ url }) => {
 
   const { response, loading, error } = useBitlyImage(url);
 
-  if (loading) return <h1>Loading...</h1>; // <Spinner />
+  if (loading) return (
+    <div className="flex items-center justify-center">
+      <Loader />
+    </div>
+  );
   if (error || !response) return <h1>Error!</h1>;
 
   const success: boolean = response.success;

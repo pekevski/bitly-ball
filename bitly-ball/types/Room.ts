@@ -1,4 +1,5 @@
 export interface Room {
     id: string,
-    createdDate: Date
+    createdDate: Date,
+    rounds: number
 }

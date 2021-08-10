@@ -22,13 +22,13 @@ type StoreProps = {
  */
 export const useStore = (props: StoreProps) => {
   const [room, setRoom] = useState("")
-  const [players, setPlayers] = useState(new Map())
-  const [newRoom, handleNewRoom] = useState(null)
+  const [players] = useState(new Map<string, Player>())
+  const [newRoom, handleNewRoom] = useState<Room | undefined>(undefined)
   const [deletedRoom, handleDeletedRoom] = useState(null)
   const [deletedPlayer, handleDeletedPlayer] = useState<any>(null)
   const [updatedPlayer, handleUpdatedPlayer] = useState(null)
-  const [newPlayer, handleNewPlayer] = useState<any>(null)
-  const [newRound, handleNewRound] = useState(null)
+  const [newPlayer, handleNewPlayer] = useState<Player | undefined>(undefined)
+  const [newRound, handleNewRound] = useState<Round | undefined>(undefined)
   const [deletedRound, handleDeletedRound] = useState(null)
 
   // Load initial data and set up listeners
@@ -38,22 +38,22 @@ export const useStore = (props: StoreProps) => {
 
     // Listen for new and deleted rooms
     const roomListener = supabase
-      .from('room')
+      .from<Room>('room')
       .on('INSERT', (payload) => handleNewRoom(payload.new))
       .on('DELETE', (payload) => handleDeletedRoom(payload.old))
       .subscribe()
 
     // Listen for changes to our players
     const playerListener = supabase
-      .from('player')
+      .from<Player>('player')
       .on('INSERT', (payload) => handleNewPlayer(payload.new))
-      .on('UPDATE', (payload) => handleUpdatedPlayer(payload.new))
-      .on('DELETE', (payload) => handleDeletedPlayer(payload.old))
-      .subscribe()
+      // .on('UPDATE', (payload) => handleUpdatedPlayer(payload.new))
+      // .on('DELETE', (payload) => handleDeletedPlayer(payload.old))
+      .subscribe(() => console.log('subbed to player insert'))
 
     // Listen for new and deleted rounds
-    const channelListener = supabase
-      .from('game')
+    const roundListener = supabase
+      .from<Round>('game')
       .on('INSERT', (payload) => handleNewRound(payload.new))
       .on('DELETE', (payload) => handleDeletedRound(payload.old))
       .subscribe()
@@ -62,67 +62,38 @@ export const useStore = (props: StoreProps) => {
     return () => {
       roomListener.unsubscribe()
       playerListener.unsubscribe()
-      channelListener.unsubscribe()
+      roundListener.unsubscribe()
+      console.log('un subbed to listeners')
     }
   }, [])
 
   // Update when the route changes
   useEffect(() => {
     if (props?.roomId) {
-      fetchPlayers(props.roomId, (players: {id: string, name: string}[]) => {
-        const users = new Map()
-        players.forEach((p) => users.set(p.id, p.name))
-        setPlayers(users)
+      
+      fetchPlayers(props.roomId, (roomPlayers: Player[] | undefined | null) => {
+        if (roomPlayers) {
+          roomPlayers.forEach((p) => players.set(p.id, p))
+          console.log('setting room players', players.size)
+        }
       })
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.roomId])
-
-  // New message recieved from Postgres
-  // useEffect(() => {
-  //   if (newMessage && newMessage.channel_id === Number(props.channelId)) {
-  //     const handleAsync = async () => {
-  //       let authorId = newMessage.user_id
-  //       if (!users.get(authorId)) await fetchUser(authorId, (user) => handleNewOrUpdatedUser(user))
-  //       setMessages(messages.concat(newMessage))
-  //     }
-  //     handleAsync()
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [newMessage])
 
   // New player recieved from Postgres
   useEffect(() => {
-    if (newPlayer) setPlayers(players.set(newPlayer.id, newPlayer.name))
+    if (newPlayer && newPlayer.roomId === props.roomId) {
+      players.set(newPlayer.id, newPlayer);
+      console.log('new player triggered', newPlayer, players)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newPlayer])
 
-  // // Deleted player received from postgres
-  // useEffect(() => {
-  //   if (deletedPlayer) {
-  //     players.delete(deletedPlayer.id);
-  //     setPlayers(players)
-  //   }
-  // }, [deletedPlayer])
-
   return {
-    players,
+    players
   }
 }
-
-// /**
-//  * Fetch all channels
-//  * @param {function} setState Optionally pass in a hook or callback to set the state
-//  */
-// export const fetchChannels = async (setState) => {
-//   try {
-//     let { body } = await supabase.from('channels').select('*')
-//     if (setState) setState(body)
-//     return body
-//   } catch (error) {
-//     console.log('error', error)
-//   }
-// }
-
 
 /**
  * Fetch all messages and their authors
@@ -132,10 +103,10 @@ export const useStore = (props: StoreProps) => {
 export const fetchPlayers = async (roomId: string, setState: any) => {
   try {
     let { body } = await supabase
-      .from('player')
+      .from<Player>('player')
       .select(`id, name`)
       .eq('roomId', roomId)
-      .order('inserted_at', {ascending: true});
+      .order('name', {ascending: true});
       
     if (setState) setState(body)
     return body
@@ -151,26 +122,22 @@ export const fetchPlayers = async (roomId: string, setState: any) => {
  */
 export const createRoom = async () => {
   try {
-    let { body } = await supabase.from('room').insert([])
+    let { body } = await supabase.from<Room>('room').insert({}).single();
     return body
   } catch (error) {
     console.log('error', error)
   }
 }
 
-/**
- * Insert a new player into the DB
- * @param {string} name The message text
- * @param {number} roomId
- */
-// export const addPlayer = async (name: string, roomId: string) => {
-//   try {
-//     let { body } = await supabase.from('player').insert([{ name, roomId }])
-//     return body
-//   } catch (error) {
-//     console.log('error', error)
-//   }
-// }
+export const createPlayer = async (name: string, roomId: string) => {
+  try {
+    let { body } = await supabase.from<Player>('player').insert([{name, roomId}]).single();
+    return body
+  } catch (error) {
+    console.log('error', error)
+  }
+}
+
 
 /**
  * Delete a channel from the DB

@@ -5,10 +5,17 @@ module.exports = {
     fontFamily: {
       'bitlyTitle': ['"Cookie"'],
     },
-    extend: {},
+    extend: {
+      animation: {
+        bounce200: 'bounce 1s infinite 200ms',
+        bounce400: 'bounce 1s infinite 400ms',
+    },
+    },
   },
   variants: {
-    extend: {},
+    extend: {
+      opacity: ['disabled'],
+    },
   },
   plugins: [],
 }

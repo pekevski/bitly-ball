@@ -4,8 +4,8 @@ type BrowserWindowProps = {}
 
 const BrowserWindow: React.FC<BrowserWindowProps> = (props) => {
     return (
-        <>
-            <div className="border border-b-0 rounded-b-none border-gray-200 rounded-lg">
+        <div className="flex flex-col shadow-xl h-full border border-gray-200 rounded-lg">
+            <div className="border-b w-full">
                 <div className="flex p-1">
                 <div className="flex">
                     <div className="rounded-full m-0.5 bg-red-500 w-3 h-3"></div>
@@ -14,10 +14,10 @@ const BrowserWindow: React.FC<BrowserWindowProps> = (props) => {
                 </div>
                 </div>
             </div>
-            <div className="border border-gray-200 rounded-lg rounded-t-none">
-               {props.children}
+            <div className="flex flex-col justify-center w-full flex-grow overflow-hidden">
+                {props.children}
             </div>
-        </>
+        </div>
     )
 }
 
