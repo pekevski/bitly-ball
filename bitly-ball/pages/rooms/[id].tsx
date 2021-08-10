@@ -30,7 +30,7 @@ const RoomPage: React.FC<RoomPageProps> = (props) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="p-4 lg:p-10 h-full w-full">
+      <main className="p-4 lg:p-10 h-full w-full bg-gradient-to-r from-green-400 to-blue-500">
           <BrowserWindow>
 
             <div className="relative flex flex-row h-full">
