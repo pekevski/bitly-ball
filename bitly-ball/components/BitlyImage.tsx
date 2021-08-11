@@ -36,6 +36,7 @@ const BitlyImage: React.FC<BitlyImageProps> = ({ url }) => {
       <Loader />
     </div>
   );
+
   if (error || !response) return <h1>Error!</h1>;
 
   const success: boolean = response.success;
@@ -43,13 +44,14 @@ const BitlyImage: React.FC<BitlyImageProps> = ({ url }) => {
     response.image && response.image.length
       ? `data:image/jpeg;charset=utl-8;base64,${response.image}`
       : undefined;
+      
   const bitlyUrl: string = response.url;
 
   if (image) {
     return (
-      <div className="rounded-lg rounded-t-none">
+      <div className="rounded-lg">
         <Image
-          className="object-contain"
+          className="object-contain rounded-lg"
           alt="Bitly Image Result"
           width="1000"
           height="600"

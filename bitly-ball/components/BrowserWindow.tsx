@@ -4,7 +4,7 @@ type BrowserWindowProps = {}
 
 const BrowserWindow: React.FC<BrowserWindowProps> = (props) => {
     return (
-        <div className="flex flex-col shadow-xl h-full border border-gray-200 rounded-lg bg-gray-200 backdrop-filter backdrop-blur-lg bg-opacity-30 z-10">
+        <div className="flex flex-col shadow-xl h-full border border-gray-100 rounded-lg bg-gray-200 backdrop-filter backdrop-blur-lg bg-opacity-30 z-10">
             <div className="border-b w-full">
                 <div className="flex p-1">
                 <div className="flex">

@@ -75,12 +75,12 @@ export default function Home() {
                       <div className="flex mt-6 w-full">
                         <button 
                           onClick={(e) => handleMode(e, 'create')}
-                          className={`${mode === 'create' ? 'bg-blue-600 text-gray-100 ' : 'bg-blue-100 text-gray-700 '} text-base rounded-r-none border-0 px-4 py-2 rounded w-full hover:bg-blue-300 focus:outline-none `}>
+                          className={`${mode === 'create' ? 'bg-blue-600 text-gray-100 ' : 'bg-white text-gray-700 '} text-base rounded-r-none border-0 px-4 py-2 rounded w-full hover:bg-blue-300 focus:outline-none `}>
                             Create
                         </button>
                         <button 
                           onClick={(e) => handleMode(e, 'join')}
-                          className={`${mode === 'join' ? 'bg-blue-600 text-gray-100 ' : 'bg-blue-100 text-gray-700 '} rounded-l-none border-0 border-l-0 px-4 py-2 rounded w-full hover:bg-blue-300 focus:outline-none `}>
+                          className={`${mode === 'join' ? 'bg-blue-600 text-gray-100 ' : 'bg-white text-gray-700 '} rounded-l-none border-0 border-l-0 px-4 py-2 rounded w-full hover:bg-blue-300 focus:outline-none `}>
                             Join
                         </button>
                     </div>
@@ -150,7 +150,7 @@ export default function Home() {
                               onClick={(e) => handleJoinRoom(e)}
                               className="w-full px-4 py-2 text-lg font-semibold text-white transition-colors duration-300 bg-blue-500 rounded-md shadow hover:bg-blue-600 focus:outline-none focus:ring-blue-200 focus:ring-4"
                             >
-                              Create
+                              Join
                             </button>
                           </div>
                           

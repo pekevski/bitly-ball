@@ -19,10 +19,10 @@ const TextInput: React.FC<TextInputProps> = (props) => {
 
   return (
     <form onSubmit={(e) => onSubmit(e, textInput)}>
-      <div className="flex w-full flex-nowrap items-stretch border border-gray-200 rounded-lg">
+      <div className="flex w-full sm:flex-nowrap flex-wrap items-stretch border border-gray-200 rounded-lg">
         <label
           htmlFor="inline-url"
-          className="font-bitlyTitle text-2xl text-center bg-transparent items-center justify-center p-3 border-r"
+          className="font-bitlyTitle text-2xl text-center bg-transparent items-center justify-center p-3 sm:border-r sm:border-b-0 border-b w-full sm:w-32"
         >
           bit.ly/
         </label>
@@ -31,13 +31,13 @@ const TextInput: React.FC<TextInputProps> = (props) => {
           id="inline-url"
           type="text"
           placeholder="Aa"
-          className="px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white bg-white focus:outline-none w-full"
+          className="p-3 placeholder-gray-200 text-blueGray-600 w-full bg-transparent focus:outline-none"
           value={textInput}
           autoComplete="off"
           onChange={(e) => setTextInput(e.target.value)}
         />
 
-        <button className="disabled:opacity-50 bg-blue-500 hover:bg-blue-400 text-white font-bold p-3 rounded-r-lg " disabled={textInput.length === 0}>
+        <button className="disabled:opacity-50 bg-blue-500 hover:bg-blue-400 text-white font-bold p-3 sm:rounded-r-lg sm:rounded-bl-none rounded-b-lg sm:border-l sm:border-t-0 border-t w-full sm:w-32" disabled={textInput.length === 0}>
           Submit
         </button>
       </div>
