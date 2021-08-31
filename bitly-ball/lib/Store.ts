@@ -17,12 +17,9 @@ type StoreProps = {
     roomId: string | undefined;
 }
 
-/**
- * @param {number} channelId the currently selected Channel
- */
 export const useStore = (props: StoreProps) => {
   const [room, setRoom] = useState("")
-  const [players] = useState(new Map<string, Player>())
+  const [players, setPlayers] = useState<Player[]>([])
   const [newRoom, handleNewRoom] = useState<Room | undefined>(undefined)
   const [deletedRoom, handleDeletedRoom] = useState(null)
   const [deletedPlayer, handleDeletedPlayer] = useState<any>(null)
@@ -49,7 +46,7 @@ export const useStore = (props: StoreProps) => {
       .on('INSERT', (payload) => handleNewPlayer(payload.new))
       // .on('UPDATE', (payload) => handleUpdatedPlayer(payload.new))
       // .on('DELETE', (payload) => handleDeletedPlayer(payload.old))
-      .subscribe(() => console.log('subbed to player insert'))
+      .subscribe()
 
     // Listen for new and deleted rounds
     const roundListener = supabase
@@ -67,16 +64,10 @@ export const useStore = (props: StoreProps) => {
     }
   }, [])
 
-  // Update when the route changes
+  // Update when the room changes
   useEffect(() => {
     if (props?.roomId) {
-      
-      fetchPlayers(props.roomId, (roomPlayers: Player[] | undefined | null) => {
-        if (roomPlayers) {
-          roomPlayers.forEach((p) => players.set(p.id, p))
-          console.log('setting room players', players.size)
-        }
-      })
+      fetchPlayers(props.roomId, setPlayers);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.roomId])
@@ -84,10 +75,11 @@ export const useStore = (props: StoreProps) => {
   // New player recieved from Postgres
   useEffect(() => {
     if (newPlayer && newPlayer.roomId === props.roomId) {
-      players.set(newPlayer.id, newPlayer);
+      if (!players.find(p => p.id === newPlayer.id)) {
+        setPlayers(players.concat(newPlayer))
+      }
       console.log('new player triggered', newPlayer, players)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newPlayer])
 
   return {

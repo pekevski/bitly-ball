@@ -1,23 +1,30 @@
-import { useState } from "react"
-import { Player } from "../types/Player";
+import { useStore } from "../lib/Store";
+import Loader from './Loader';
 
 type PlayersProps = {
-  players: Map<string, Player>;
+  roomId: string;
 };
 
-const Players: React.FC<PlayersProps> = (props) => {
+const Players: React.FC<PlayersProps> = ({roomId}) => {
   
-  return (
-    <>
-      {
-        Array.from(props.players).map((player) => 
-          <div key={player[1].id}>
-            <h1>{player[1].name}</h1>
-          </div>
-        )
-      }
-    </>
-  )
+  const { players } = useStore({ roomId });
+
+  if (!players) {
+    return <Loader />
+  } else {
+    return (
+      <>
+        {
+          players.map((player) => 
+            <div key={player.id}>
+              <h1>{player.name}</h1>
+            </div>
+          )
+        }
+      </>
+    )
+  }
+
 }
 
 export default Players;

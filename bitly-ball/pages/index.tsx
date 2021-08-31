@@ -49,9 +49,9 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="p-4 lg:p-10 h-full w-full bg-gradient-to-r from-green-400 to-blue-500">
+      <main className="p-4 lg:p-10 h-full w-full bg-gradient-to-r from-gray-100 to-gray-200">
 
-          <BrowserWindow>
+          {/* <BrowserWindow> */}
  
             <div className="flex items-center p-4 lg:justify-center">
                   <div
@@ -160,11 +160,7 @@ export default function Home() {
                   </div>
                 </div>
 
-
-
-
-
-          </BrowserWindow>
+          {/* </BrowserWindow> */}
       </main>
 
       <footer className="flex items-center justify-center w-full h-24 border-t">

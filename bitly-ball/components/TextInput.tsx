@@ -19,7 +19,7 @@ const TextInput: React.FC<TextInputProps> = (props) => {
 
   return (
     <form onSubmit={(e) => onSubmit(e, textInput)}>
-      <div className="flex w-full sm:flex-nowrap flex-wrap items-stretch border border-gray-200 rounded-lg">
+      <div className="flex w-full sm:flex-nowrap flex-wrap items-stretch border border-gray-300 rounded-lg">
         <label
           htmlFor="inline-url"
           className="font-bitlyTitle text-2xl text-center bg-transparent items-center justify-center p-3 sm:border-r sm:border-b-0 border-b w-full sm:w-32"
@@ -31,7 +31,7 @@ const TextInput: React.FC<TextInputProps> = (props) => {
           id="inline-url"
           type="text"
           placeholder="Aa"
-          className="p-3 placeholder-gray-200 text-blueGray-600 w-full bg-transparent focus:outline-none"
+          className="p-3 placeholder-gray-500 text-blueGray-600 w-full bg-transparent focus:outline-none"
           value={textInput}
           autoComplete="off"
           onChange={(e) => setTextInput(e.target.value)}

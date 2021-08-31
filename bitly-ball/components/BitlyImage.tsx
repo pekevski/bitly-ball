@@ -1,15 +1,19 @@
 import Image from "next/image";
 import useSWR from "swr";
 import { ScreenshotResponse } from "../types/ScreenshotResponse";
-import { memo } from "react";
 import Loader from './Loader';
+
+type BitlyImageProps = {
+  url: string;
+  handleSuccess: (response: ScreenshotResponse | undefined) => void;
+};
 
 const fetcher = (url: RequestInfo) => fetch(url).then((res) => res.json());
 
 const useBitlyImage = (urlInput: string) => {
   
   const bitlyUrl: string = `https://bit.ly/${urlInput}`;
-  
+
   const { data, error } = useSWR<ScreenshotResponse, any>(
     `${process.env.NEXT_PUBLIC_SNAPSHOT_LAMBDA_ENDPOINT}?url=${bitlyUrl}`,
     fetcher,
@@ -23,31 +27,26 @@ const useBitlyImage = (urlInput: string) => {
   };
 };
 
-type BitlyImageProps = {
-  url: string;
-};
+const BitlyImage: React.FC<BitlyImageProps> = ({ url, handleSuccess }) => {
 
-const BitlyImage: React.FC<BitlyImageProps> = ({ url }) => {
+    const {response, loading, error} = useBitlyImage(url)
 
-  const { response, loading, error } = useBitlyImage(url);
+    if (loading) {
+      return <Loader />
+    }
 
-  if (loading) return (
-    <div className="flex items-center justify-center">
-      <Loader />
-    </div>
-  );
+    handleSuccess(response)
 
-  if (error || !response) return <h1>Error!</h1>;
-
-  const success: boolean = response.success;
-  const image: string | undefined =
-    response.image && response.image.length
+    const image: string | undefined = response && response.image && response.image.length
       ? `data:image/jpeg;charset=utl-8;base64,${response.image}`
       : undefined;
-      
-  const bitlyUrl: string = response.url;
 
-  if (image) {
+    if (!image) {
+      return (
+        <h3>Image is corrupted</h3>
+      )
+    }
+
     return (
       <div className="rounded-lg">
         <Image
@@ -59,10 +58,7 @@ const BitlyImage: React.FC<BitlyImageProps> = ({ url }) => {
         />
       </div>
     );
-  }
-  {
-    return <h1>No Image</h1>;
-  }
+    
 };
 
-export default memo(BitlyImage);
+export default BitlyImage;
