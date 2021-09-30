@@ -1,23 +1,21 @@
 import Head from "next/head";
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { useState } from "react";
 import BitlyImage from "../../components/BitlyImage";
 import { useRouter } from "next/router";
-import { createPlayer, useStore } from "../../lib/Store";
-import BrowserWindow from "../../components/BrowserWindow";
 import TextInput from "../../components/TextInput";
 import Players from "../../components/Players";
-import useSWR from "swr";
 import { ScreenshotResponse } from "../../types/ScreenshotResponse";
-import Loader from "../../components/Loader";
+import Button from "../../components/Button";
+import { useStore } from "../../lib/Store";
 
 type RoomPageProps = {};
 
-
-const RoomPage: React.FC<RoomPageProps> = (props) => {
+const RoomPage: React.FC<RoomPageProps> = () => {
   const router = useRouter();
   const query = router.query;
   const roomId = query.id as string;
 
+  const { room, players } = useStore({ roomId });
   const [url, setUrl] = useState<string>("");
   const [response, setResponse] = useState<ScreenshotResponse | undefined>(undefined);
   
@@ -33,28 +31,44 @@ const RoomPage: React.FC<RoomPageProps> = (props) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="h-full w-full bg-gradient-to-r from-gray-100 to-gray-300">
+      <main className="h-full w-full">
           <div className="flex lg:flex-row flex-col h-full">
-            <div className="flex-1 p-5 flex flex-col justify-between">
-              <h1 className="font-bitlyTitle text-6xl pb-5">Bitly Ball</h1>
-              { !!url.length && <BitlyImage url={url} handleSuccess={setResponse}/> }
+            <div className="flex-1 flex flex-col justify-between">
+              <div>
+                <h1 className="font-bitlyTitle text-6xl p-5">Bitly Ball</h1>
+
+                { !!room && 
+                  <div className="px-5">
+                    <h2>Status: {room.status}</h2>
+                    <h2>Rounds: {room.rounds}</h2>
+                  </div>
+                }
+              </div>
+
+              { !!url.length && 
+                <div className="p-5">
+                  <BitlyImage url={url} handleSuccess={setResponse}/>
+                </div> 
+              }
               { !response && 
-                <div className="align-bottom">
+                <div className="p-5 align-bottom bg-gray-100">
                   <TextInput handleSubmit={setUrl} />
                 </div> 
               }
               { !!response && 
-                <div>
-                  <h4>{response.success ? 'SUCCESS' : 'FAILURE' }</h4>
-                  <h4>Attempted {response.url}</h4>
-                  <button onClick={handleTryAgain}>Try Again</button>
+                <div className="align-bottom bg-gray-100 p-5">
+                  <div className="flex sm:flex-row justify-between pb-5">
+                    <h4>{response.success ? '200 OK Success!' : '404 Fail!' } {response.success ? '+' : '-'}{url.length} points</h4>
+                    <h4>{response.url}</h4>
+                  </div>
+                  <Button handleClick={handleTryAgain}>Try Again</Button>
                 </div>
               }
             </div>
 
             <div className="rounded-br-lg overflow-y-hidden">
               <div className="p-5 h-full overflow-y-auto bg-gray-200">
-                <Players roomId={roomId} />
+                <Players players={players} />
               </div>
             </div>
           </div>

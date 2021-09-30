@@ -16,10 +16,9 @@ const TextInput: React.FC<TextInputProps> = (props) => {
     }
   };
 
-
   return (
     <form onSubmit={(e) => onSubmit(e, textInput)}>
-      <div className="flex w-full sm:flex-nowrap flex-wrap items-stretch border border-gray-300 rounded-lg">
+      <div className="flex w-full sm:flex-nowrap flex-wrap items-stretch border border-gray-300 bg-white rounded-lg">
         <label
           htmlFor="inline-url"
           className="font-bitlyTitle text-2xl text-center bg-transparent items-center justify-center p-3 sm:border-r sm:border-b-0 border-b w-full sm:w-32"

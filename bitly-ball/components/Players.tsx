@@ -1,14 +1,12 @@
-import { useStore } from "../lib/Store";
+import { Player } from "../types/Player";
 import Loader from './Loader';
 
 type PlayersProps = {
-  roomId: string;
+  players: Array<Player>;
 };
 
-const Players: React.FC<PlayersProps> = ({roomId}) => {
+const Players: React.FC<PlayersProps> = ({players}) => {
   
-  const { players } = useStore({ roomId });
-
   if (!players) {
     return <Loader />
   } else {

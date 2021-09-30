@@ -1,5 +1,11 @@
 export interface Room {
     id: string,
     createdDate: Date,
-    rounds: number
+    rounds: number,
+    status: RoomStatusEnum
+}
+
+export enum RoomStatusEnum {
+    CREATED = 'created',
+    INPROGRESS = 'inprogress',
 }

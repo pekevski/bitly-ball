@@ -1,22 +1,26 @@
 import Head from "next/head";
 import React, { useState } from "react";
 import Router from 'next/router'
-import BrowserWindow from "../components/BrowserWindow";
 import { createPlayer, createRoom } from "../lib/Store";
+import NumberCounter from "../components/NumberCounter";
 
 
 export default function Home() {
 
   const [mode, setMode] = useState<'create' | 'join'>('create');
   const [playerName, setPlayerName] = useState<string>("");
+  const [rounds, setRounds] = useState<number>(3);
   const [roomId, setRoomId] = useState<string>("");
 
   const handleCreateRoom = async (e: React.FormEvent) => {
     e.preventDefault();
-    const room = await createRoom();
+
+    // TODO: validate if player has provided a valid name
+
+    const room = await createRoom(rounds);
 
     if (room) {
-      const player = await createPlayer(playerName, room.id)
+      await createPlayer(playerName, room.id)
       Router.push(`/rooms/${room.id}`)
     }
 
@@ -25,7 +29,7 @@ export default function Home() {
   const handleJoinRoom = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // TODO: validate if room even exists...
+    // TODO: validate if room even exists OR is in progress already...
 
     const player = await createPlayer(playerName, roomId)
 
@@ -50,8 +54,6 @@ export default function Home() {
       </Head>
 
       <main className="p-4 lg:p-10 h-full w-full bg-gradient-to-r from-gray-100 to-gray-200">
-
-          {/* <BrowserWindow> */}
  
             <div className="flex items-center p-4 lg:justify-center">
                   <div
@@ -100,6 +102,11 @@ export default function Home() {
                               onChange={(e) => setPlayerName(e.target.value)}
                               className="px-4 py-2 transition duration-300 border border-gray-300 rounded focus:border-transparent focus:outline-none focus:ring-4 focus:ring-blue-200"
                             />
+                          </div>
+
+                          <div className="flex flex-col space-y-1">
+                            <label htmlFor="numberOfRounds" className="text-sm font-semibold text-gray-500">Number of Rounds</label>
+                            <NumberCounter id={"numberOfRounds"} min={0} max={5} value={rounds} onValueChange={(e) => setRounds(e)} />
                           </div>
                           
                           <div>
@@ -159,8 +166,6 @@ export default function Home() {
                     }
                   </div>
                 </div>
-
-          {/* </BrowserWindow> */}
       </main>
 
       <footer className="flex items-center justify-center w-full h-24 border-t">

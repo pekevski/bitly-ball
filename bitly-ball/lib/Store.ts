@@ -14,11 +14,11 @@ export const supabase = createClient(
 )
 
 type StoreProps = {
-    roomId: string | undefined;
+  roomId: string | undefined;
 }
 
 export const useStore = (props: StoreProps) => {
-  const [room, setRoom] = useState("")
+  const [room, setRoom] = useState<Room | undefined>(undefined);
   const [players, setPlayers] = useState<Player[]>([])
   const [newRoom, handleNewRoom] = useState<Room | undefined>(undefined)
   const [deletedRoom, handleDeletedRoom] = useState(null)
@@ -60,19 +60,21 @@ export const useStore = (props: StoreProps) => {
       roomListener.unsubscribe()
       playerListener.unsubscribe()
       roundListener.unsubscribe()
-      console.log('un subbed to listeners')
+      console.log('unsubbed to listeners')
     }
   }, [])
+  
 
   // Update when the room changes
   useEffect(() => {
     if (props?.roomId) {
+      fetchRoom(props.roomId, setRoom);
       fetchPlayers(props.roomId, setPlayers);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.roomId])
 
-  // New player recieved from Postgres
+  // New player received from Postgres
   useEffect(() => {
     if (newPlayer && newPlayer.roomId === props.roomId) {
       if (!players.find(p => p.id === newPlayer.id)) {
@@ -83,17 +85,20 @@ export const useStore = (props: StoreProps) => {
   }, [newPlayer])
 
   return {
+    room,
     players
   }
 }
 
 /**
- * Fetch all messages and their authors
- * @param {number} channelId
+ * Fetch all players for a room
+ * @param {number} roomId
  * @param {function} setState Optionally pass in a hook or callback to set the state
  */
 export const fetchPlayers = async (roomId: string, setState: any) => {
   try {
+    console.log('Fetching players....')
+
     let { body } = await supabase
       .from<Player>('player')
       .select(`id, name`)
@@ -108,13 +113,34 @@ export const fetchPlayers = async (roomId: string, setState: any) => {
 }
 
 /**
+ * Fetch the room
+ * @param {number} roomId
+ * @param {function} setState Optionally pass in a hook or callback to set the state
+ */
+export const fetchRoom = async (roomId: string, setState: any) => {
+  try {
+    console.log('Fetching room....')
+    let { body } = await supabase
+      .from<Room>('room')
+      .select()
+      .eq('id', roomId)
+      .single();
+      
+    if (setState) setState(body)
+    return body
+  } catch (error) {
+    console.log('error', error)
+  }
+}
+
+/**
  * Insert a new channel into the DB
  * @param {string} slug The channel name
  * @param {number} user_id The channel creator
  */
-export const createRoom = async () => {
+export const createRoom = async (rounds: number) => {
   try {
-    let { body } = await supabase.from<Room>('room').insert({}).single();
+    let { body } = await supabase.from<Room>('room').insert({rounds}).single();
     return body
   } catch (error) {
     console.log('error', error)
@@ -123,7 +149,7 @@ export const createRoom = async () => {
 
 export const createPlayer = async (name: string, roomId: string) => {
   try {
-    let { body } = await supabase.from<Player>('player').insert([{name, roomId}]).single();
+    let { body } = await supabase.from<Player>('player').insert({name, roomId}).single();
     return body
   } catch (error) {
     console.log('error', error)
