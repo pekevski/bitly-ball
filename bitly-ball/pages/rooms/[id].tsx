@@ -6,7 +6,8 @@ import TextInput from "../../components/TextInput";
 import Players from "../../components/Players";
 import { ScreenshotResponse } from "../../types/ScreenshotResponse";
 import Button from "../../components/Button";
-import { useStore } from "../../lib/Store";
+import { startRoom, useStore } from "../../lib/Store";
+import { RoomStatusEnum } from "../../types/Room";
 
 type RoomPageProps = {};
 
@@ -24,6 +25,10 @@ const RoomPage: React.FC<RoomPageProps> = () => {
     setResponse(undefined);
   }
 
+  const handleStartGame = () => {
+    startRoom(roomId)
+  }
+
   return (
     <div className="flex flex-col min-h-screen h-screen items-center">
       <Head>
@@ -34,16 +39,29 @@ const RoomPage: React.FC<RoomPageProps> = () => {
       <main className="h-full w-full">
           <div className="flex lg:flex-row flex-col h-full">
             <div className="flex-1 flex flex-col justify-between">
-              <div>
+              <div className="flex justify-between">
                 <h1 className="font-bitlyTitle text-6xl p-5">Bitly Ball</h1>
 
                 { !!room && 
-                  <div className="px-5">
+                  <div className="p-5">
                     <h2>Status: {room.status}</h2>
                     <h2>Rounds: {room.rounds}</h2>
                   </div>
                 }
               </div>
+
+              { !!room && room.status === RoomStatusEnum.CREATED &&
+                <>
+                  <h1>CREATED</h1>
+                  <Button handleClick={handleStartGame}>Start Room</Button>
+                </>
+              }
+
+              { !!room && room.status === RoomStatusEnum.INPROGRESS &&
+                <>
+                  <h1>IN PROGRESS</h1>
+                </>
+              }
 
               { !!url.length && 
                 <div className="p-5">

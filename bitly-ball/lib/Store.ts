@@ -1,8 +1,8 @@
 import { useState, useEffect, Dispatch, SetStateAction } from 'react'
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupbaseEv } from '@supabase/supabase-js'
 import { Player } from '../types/Player';
 import { Round } from '../types/Round';
-import { Room } from '../types/Room';
+import { Room, RoomStatusEnum } from '../types/Room';
 
 const SUPABASE_URL: string = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const SUPABASE_KEY: string = process.env.NEXT_PUBLIC_SUPABASE_KEY || "";
@@ -21,6 +21,7 @@ export const useStore = (props: StoreProps) => {
   const [room, setRoom] = useState<Room | undefined>(undefined);
   const [players, setPlayers] = useState<Player[]>([])
   const [newRoom, handleNewRoom] = useState<Room | undefined>(undefined)
+  const [updatedRoom, handleUpdatedRoom] = useState<Room>();
   const [deletedRoom, handleDeletedRoom] = useState(null)
   const [deletedPlayer, handleDeletedPlayer] = useState<any>(null)
   const [updatedPlayer, handleUpdatedPlayer] = useState(null)
@@ -35,14 +36,18 @@ export const useStore = (props: StoreProps) => {
 
     // Listen for new and deleted rooms
     const roomListener = supabase
-      .from<Room>('room')
+      .from<Room>('room') //`room:id=eq.${props.roomId}`)
       .on('INSERT', (payload) => handleNewRoom(payload.new))
-      .on('DELETE', (payload) => handleDeletedRoom(payload.old))
+      .on('UPDATE', (payload) => { 
+        console.log('UPDATED A ROOM', payload); 
+        handleUpdatedRoom(payload.new)
+      })
+      // .on('DELETE', (payload) => handleDeletedRoom(payload.old))
       .subscribe()
 
     // Listen for changes to our players
     const playerListener = supabase
-      .from<Player>('player')
+      .from<Player>('player') // `player:roomId=eq.${props.roomId}`)
       .on('INSERT', (payload) => handleNewPlayer(payload.new))
       // .on('UPDATE', (payload) => handleUpdatedPlayer(payload.new))
       // .on('DELETE', (payload) => handleDeletedPlayer(payload.old))
@@ -50,7 +55,7 @@ export const useStore = (props: StoreProps) => {
 
     // Listen for new and deleted rounds
     const roundListener = supabase
-      .from<Round>('game')
+      .from<Round>('round') //`round:roomId=eq.${props.roomId}`)
       .on('INSERT', (payload) => handleNewRound(payload.new))
       .on('DELETE', (payload) => handleDeletedRound(payload.old))
       .subscribe()
@@ -84,6 +89,16 @@ export const useStore = (props: StoreProps) => {
     }
   }, [newPlayer])
 
+  // Updated room received from Postgres
+  useEffect(() => {
+    console.log('room triggered', updatedRoom);
+
+    if (updatedRoom && updatedRoom.id === props.roomId) {
+      setRoom(updatedRoom);
+      console.log('updated room triggered', updatedRoom);
+    }
+  }, [updatedRoom])
+
   return {
     room,
     players
@@ -101,7 +116,7 @@ export const fetchPlayers = async (roomId: string, setState: any) => {
 
     let { body } = await supabase
       .from<Player>('player')
-      .select(`id, name`)
+      .select("*")
       .eq('roomId', roomId)
       .order('name', {ascending: true});
       
@@ -147,9 +162,22 @@ export const createRoom = async (rounds: number) => {
   }
 }
 
-export const createPlayer = async (name: string, roomId: string) => {
+export const createPlayer = async (player: Partial<Player>) => {
   try {
-    let { body } = await supabase.from<Player>('player').insert({name, roomId}).single();
+    let { body } = await supabase.from<Player>('player').insert(player).single();
+    return body
+  } catch (error) {
+    console.log('error', error)
+  }
+}
+
+export const startRoom = async (roomId: string) => {
+  try {
+    let { body } = await supabase
+      .from<Room>('room')
+      .update({status: RoomStatusEnum.INPROGRESS})
+      .match({ id: roomId })
+
     return body
   } catch (error) {
     console.log('error', error)
