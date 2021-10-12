@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import Router from 'next/router'
 import { createPlayer, createRoom } from "../lib/Store";
 import NumberCounter from "../components/NumberCounter";
+import Button from "../components/Button";
 
 
 export default function Home() {
@@ -12,26 +13,24 @@ export default function Home() {
   const [rounds, setRounds] = useState<number>(3);
   const [roomId, setRoomId] = useState<string>("");
 
-  const handleCreateRoom = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleCreateRoom = async () => {
 
     // TODO: validate if player has provided a valid name
 
     const room = await createRoom(rounds);
 
     if (room) {
-      await createPlayer(playerName, room.id)
+      await createPlayer({name: playerName, roomId: room.id, isHost: true})
       Router.push(`/rooms/${room.id}`)
     }
 
   }
 
-  const handleJoinRoom = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleJoinRoom = async () => {
 
     // TODO: validate if room even exists OR is in progress already...
 
-    const player = await createPlayer(playerName, roomId)
+    const player = await createPlayer({name: playerName, roomId: roomId, isHost: false})
 
     Router.push(`/rooms/${roomId}`)
   }
@@ -112,13 +111,7 @@ export default function Home() {
                           </div>
                           
                         </form>
-                        <button
-                          type="submit"
-                          onClick={(e) => handleCreateRoom(e)}
-                          className="w-full px-4 py-2 text-lg font-semibold text-white transition-colors duration-300 bg-blue-500 rounded-md shadow hover:bg-blue-600 focus:outline-none focus:ring-blue-200 focus:ring-4"
-                        >
-                          Create
-                        </button>
+                        <Button handleClick={handleCreateRoom}>Create</Button>
                       </div>
                     }
 
@@ -151,13 +144,8 @@ export default function Home() {
                           
                         </form>
 
-                        <button
-                          type="submit"
-                          onClick={(e) => handleJoinRoom(e)}
-                          className="w-full px-4 py-2 text-lg font-semibold text-white transition-colors duration-300 bg-blue-500 rounded-md shadow hover:bg-blue-600 focus:outline-none focus:ring-blue-200 focus:ring-4"
-                        >
-                          Join
-                        </button>
+                        <Button handleClick={handleJoinRoom}>Join</Button>
+
                       </div>
                     }
                   </div>
