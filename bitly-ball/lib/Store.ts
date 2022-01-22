@@ -1,5 +1,5 @@
 import { useState, useEffect, Dispatch, SetStateAction } from 'react'
-import { createClient, SupbaseEv } from '@supabase/supabase-js'
+import { createClient } from '@supabase/supabase-js'
 import { Player } from '../types/Player';
 import { Round } from '../types/Round';
 import { Room, RoomStatusEnum } from '../types/Room';
