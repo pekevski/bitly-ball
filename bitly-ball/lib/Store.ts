@@ -1,17 +1,9 @@
-import { useState, useEffect, Dispatch, SetStateAction } from 'react'
-import { createClient } from '@supabase/supabase-js'
+import { useState, useEffect } from 'react'
 import { Player } from '../types/Player';
 import { Round } from '../types/Round';
-import { Room, RoomStatusEnum } from '../types/Room';
-
-const SUPABASE_URL: string = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const SUPABASE_KEY: string = process.env.NEXT_PUBLIC_SUPABASE_KEY || "";
-
-
-export const supabase = createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-)
+import { Room } from '../types/Room';
+import { supabase } from './SupbaseConfig';
+import { fetchPlayers, fetchRoom, fetchRounds } from './Repository';
 
 type StoreProps = {
   roomId: string | undefined;
@@ -20,6 +12,7 @@ type StoreProps = {
 export const useStore = (props: StoreProps) => {
   const [room, setRoom] = useState<Room | undefined>(undefined);
   const [players, setPlayers] = useState<Player[]>([])
+  const [rounds, setRounds] = useState<Round[]>([])
   const [newRoom, handleNewRoom] = useState<Room | undefined>(undefined)
   const [updatedRoom, handleUpdatedRoom] = useState<Room>();
   const [deletedRoom, handleDeletedRoom] = useState(null)
@@ -36,18 +29,15 @@ export const useStore = (props: StoreProps) => {
 
     // Listen for new and deleted rooms
     const roomListener = supabase
-      .from<Room>('room') //`room:id=eq.${props.roomId}`)
+      .from<Room>('room') // TODO: improve listener `room:id=eq.${props.roomId}`)
       .on('INSERT', (payload) => handleNewRoom(payload.new))
-      .on('UPDATE', (payload) => { 
-        console.log('UPDATED A ROOM', payload); 
-        handleUpdatedRoom(payload.new)
-      })
+      .on('UPDATE', (payload) => handleUpdatedRoom(payload.new))
       // .on('DELETE', (payload) => handleDeletedRoom(payload.old))
       .subscribe()
 
     // Listen for changes to our players
     const playerListener = supabase
-      .from<Player>('player') // `player:roomId=eq.${props.roomId}`)
+      .from<Player>('player') // TODO: improve listener `player:roomId=eq.${props.roomId}`)
       .on('INSERT', (payload) => handleNewPlayer(payload.new))
       // .on('UPDATE', (payload) => handleUpdatedPlayer(payload.new))
       // .on('DELETE', (payload) => handleDeletedPlayer(payload.old))
@@ -55,7 +45,7 @@ export const useStore = (props: StoreProps) => {
 
     // Listen for new and deleted rounds
     const roundListener = supabase
-      .from<Round>('round') //`round:roomId=eq.${props.roomId}`)
+      .from<Round>('round') // TODO: improve listener `round:roomId=eq.${props.roomId}`)
       .on('INSERT', (payload) => handleNewRound(payload.new))
       .on('DELETE', (payload) => handleDeletedRound(payload.old))
       .subscribe()
@@ -75,6 +65,7 @@ export const useStore = (props: StoreProps) => {
     if (props?.roomId) {
       fetchRoom(props.roomId, setRoom);
       fetchPlayers(props.roomId, setPlayers);
+      fetchRounds(props.roomId, setRounds)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.roomId])
@@ -99,103 +90,22 @@ export const useStore = (props: StoreProps) => {
     }
   }, [updatedRoom])
 
+  // Updated rounds received from Postgres
+  useEffect(() => {
+    console.log('new round triggered', newRound);
+
+    if (newRound && newRound.roomId === props.roomId) {
+      if (!rounds.find(r => r.id === newRound.id)) {
+        setRounds(rounds.concat(newRound));
+      }
+      console.log('new round triggered', newRound, rounds)
+    }
+  }, [newRound])
+
   return {
     room,
-    players
+    players,
+    rounds
   }
 }
 
-/**
- * Fetch all players for a room
- * @param {number} roomId
- * @param {function} setState Optionally pass in a hook or callback to set the state
- */
-export const fetchPlayers = async (roomId: string, setState: any) => {
-  try {
-    console.log('Fetching players....')
-
-    let { body } = await supabase
-      .from<Player>('player')
-      .select("*")
-      .eq('roomId', roomId)
-      .order('name', {ascending: true});
-      
-    if (setState) setState(body)
-    return body
-  } catch (error) {
-    console.log('error', error)
-  }
-}
-
-/**
- * Fetch the room
- * @param {number} roomId
- * @param {function} setState Optionally pass in a hook or callback to set the state
- */
-export const fetchRoom = async (roomId: string, setState: any) => {
-  try {
-    console.log('Fetching room....')
-    let { body } = await supabase
-      .from<Room>('room')
-      .select()
-      .eq('id', roomId)
-      .single();
-      
-    if (setState) setState(body)
-    return body
-  } catch (error) {
-    console.log('error', error)
-  }
-}
-
-/**
- * Insert a new channel into the DB
- * @param {string} slug The channel name
- * @param {number} user_id The channel creator
- */
-export const createRoom = async (rounds: number) => {
-  try {
-    let { body } = await supabase.from<Room>('room').insert({rounds}).single();
-    return body
-  } catch (error) {
-    console.log('error', error)
-  }
-}
-
-export const createPlayer = async (player: Partial<Player>) => {
-  try {
-    let { body } = await supabase.from<Player>('player').insert(player).single();
-    return body
-  } catch (error) {
-    console.log('error', error)
-  }
-}
-
-export const startRoom = async (roomId: string) => {
-  try {
-    let { body } = await supabase
-      .from<Room>('room')
-      .update({status: RoomStatusEnum.INPROGRESS})
-      .match({ id: roomId })
-
-    return body
-  } catch (error) {
-    console.log('error', error)
-  }
-}
-
-
-/**
- * Delete a channel from the DB
- * @param {number} channel_id
- */
-// export const deleteRoom = async (roomId: string) => {
-//   try {
-//     let { body: playerBody } = await supabase.from<Player>('player').delete().match({ roomId: roomId })
-//     let { body: gameBody } = await supabase.from<Round>('game').delete().match({ playerId: [playerBody?.map(p => p.id)] })
-//     let { body: roomBody } = await supabase.from<Room>('room').delete().match({ id: roomId })
-//     return roomBody
-//   } catch (error) {
-//     console.log('error', error)
-//   }
-// }

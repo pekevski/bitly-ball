@@ -1,10 +1,12 @@
 import Head from "next/head";
 import React, { useState } from "react";
 import Router from "next/router";
-import { createPlayer, createRoom, fetchRoom } from "../lib/Store";
+import { createPlayer, createRoom, fetchRoom } from "../lib/Repository";
 import NumberCounter from "../components/NumberCounter";
 import Button from "../components/Button";
 import { Room, RoomStatusEnum } from "../types/Room";
+import { Page } from "../components/Layout/Page";
+import { savePlayerLocalStorage } from "../lib/LocalStorage";
 
 export default function Home() {
   const [mode, setMode] = useState<"create" | "join">("create");
@@ -14,6 +16,8 @@ export default function Home() {
   const [error, setError] = useState<string | undefined>(undefined);
 
   const handleCreateRoom = async () => {
+    console.log("BITLY => handle Create Room");
+
     try {
       if (!playerName) {
         throw new Error("Please provide a player name");
@@ -26,7 +30,12 @@ export default function Home() {
       const room = await createRoom(rounds);
 
       if (room) {
-        await createPlayer({ name: playerName, roomId: room.id, isHost: true });
+        const player = await createPlayer({ name: playerName, roomId: room.id, isHost: true });
+
+        if (player) {
+          await savePlayerLocalStorage(player);
+        }
+        // save player to localstorage
         Router.push(`/rooms/${room.id}`);
       }
     } catch (e) {
@@ -37,6 +46,8 @@ export default function Home() {
   };
 
   const handleJoinRoom = async () => {
+    console.log("BITLY => handle Join Room");
+
     try {
       if (!roomId) {
         throw new Error("Please provide a room code");
@@ -69,6 +80,11 @@ export default function Home() {
         roomId: roomId,
         isHost: false,
       });
+
+      if (player) {
+        await savePlayerLocalStorage(player);
+      }
+
       Router.push(`/rooms/${roomId}`);
     } catch (e) {
       if (e instanceof Error) {
@@ -78,24 +94,26 @@ export default function Home() {
   };
 
   const handleMode = (e: React.FormEvent, mode: "create" | "join") => {
+    console.log("BITLY => handle Mode");
+
     e.preventDefault();
 
     if (mode === "create") {
       setRoomId("");
     }
 
-    setError(undefined)
+    setError(undefined);
     setMode(mode);
   };
 
   return (
-    <div className="flex flex-col min-h-screen h-screen items-center">
+    <Page>
       <Head>
         <title>Bitly Ball</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="p-4 lg:p-10 h-full w-full bg-gradient-to-r from-gray-100 to-gray-200">
+      <main className="lg:p-10 h-full w-full">
         <div className="flex items-center p-4 lg:justify-center rounded">
           <div className="flex flex-col rounded shadow-lg max md:flex-row md:flex-1 lg:max-w-screen-md">
             <div className="p-5 text-white bg-blue-500 md:w-80 md:flex-shrink-0 md:flex md:flex-col md:items-center md:justify-between">
@@ -183,7 +201,7 @@ export default function Home() {
                     />
                   </div>
                 </form>
-                <Button handleClick={handleCreateRoom}>Create</Button>
+                <Button handleClick={handleCreateRoom} disabled={false}>Create</Button>
                 {error && (
                   <h1 className="text-red-400">
                     <span className="pr-2">🚫</span> {error}
@@ -231,13 +249,13 @@ export default function Home() {
                     />
                   </div>
                 </form>
-
-                <Button handleClick={handleJoinRoom}>Join</Button>
+                <Button handleClick={handleJoinRoom} disabled={false}>Join</Button>
                 {error && (
                   <h1 className="text-red-400">
                     <span className="pr-2">🚫</span> {error}
                   </h1>
-                )}              </div>
+                )}{" "}
+              </div>
             )}
           </div>
         </div>
@@ -253,6 +271,6 @@ export default function Home() {
           Created by Daniel Pekevski
         </a>
       </footer>
-    </div>
+    </Page>
   );
 }

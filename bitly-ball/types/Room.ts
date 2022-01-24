@@ -1,4 +1,4 @@
-export interface Room {
+export type Room = {
     id: string,
     createdDate: Date,
     rounds: number,

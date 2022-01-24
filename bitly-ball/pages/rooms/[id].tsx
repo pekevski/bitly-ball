@@ -1,13 +1,14 @@
 import Head from "next/head";
-import React, { useState } from "react";
-import BitlyImage from "../../components/BitlyImage";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import TextInput from "../../components/TextInput";
 import Players from "../../components/Players";
-import { ScreenshotResponse } from "../../types/ScreenshotResponse";
-import Button from "../../components/Button";
-import { startRoom, useStore } from "../../lib/Store";
-import { RoomStatusEnum } from "../../types/Room";
+import { useStore } from "../../lib/Store";
+import Rounds from "../../components/Rounds";
+import { Page } from "../../components/Layout/Page";
+import { Container } from "../../components/Layout/Container";
+import { getPlayerLocalStorage } from "../../lib/LocalStorage";
+import { Player } from "../../types/Player";
+import { Game } from "../../components/Game";
 
 type RoomPageProps = {};
 
@@ -16,82 +17,67 @@ const RoomPage: React.FC<RoomPageProps> = () => {
   const query = router.query;
   const roomId = query.id as string;
 
-  const { room, players } = useStore({ roomId });
-  const [url, setUrl] = useState<string>("");
-  const [response, setResponse] = useState<ScreenshotResponse | undefined>(undefined);
-  
-  const handleTryAgain = () => {
-    setUrl("");
-    setResponse(undefined);
-  }
+  const { room, players, rounds } = useStore({ roomId });
+  const [currentPlayer, setCurrentPlayer] = useState<Player | undefined>(
+    undefined
+  );
 
-  const handleStartGame = () => {
-    startRoom(roomId)
-  }
+  useEffect(() => {
+    const curr = getPlayerLocalStorage();
+    if (curr?.roomId === roomId) {
+      setCurrentPlayer(curr);
+    }
+  }, [roomId]);
 
   return (
-    <div className="flex flex-col min-h-screen h-screen items-center">
+    <Page>
       <Head>
         <title>Bitly Ball</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <main className="h-full w-full">
-          <div className="flex lg:flex-row flex-col h-full">
-            <div className="flex-1 flex flex-col justify-between">
+        <div className="flex lg:flex-row flex-col h-full">
+          <Container>
+            <div className="flex flex-col">
               <div className="flex justify-between">
                 <h1 className="font-bitlyTitle text-6xl p-5">Bitly Ball</h1>
 
-                { !!room && 
-                  <div className="p-5">
+                {!!room && (
+                  <div className="p-5 border-bottom-5">
                     <h2>Status: {room.status}</h2>
                     <h2>Rounds: {room.rounds}</h2>
                   </div>
-                }
+                )}
               </div>
 
-              { !!room && room.status === RoomStatusEnum.CREATED &&
-                <>
-                  <h1>CREATED</h1>
-                  <Button handleClick={handleStartGame}>Start Room</Button>
-                </>
-              }
-
-              { !!room && room.status === RoomStatusEnum.INPROGRESS &&
-                <>
-                  <h1>IN PROGRESS</h1>
-                </>
-              }
-
-              { !!url.length && 
-                <div className="p-5">
-                  <BitlyImage url={url} handleSuccess={setResponse}/>
-                </div> 
-              }
-              { !response && 
-                <div className="p-5 align-bottom bg-gray-100">
-                  <TextInput handleSubmit={setUrl} />
-                </div> 
-              }
-              { !!response && 
-                <div className="align-bottom bg-gray-100 p-5">
-                  <div className="flex sm:flex-row justify-between pb-5">
-                    <h4>{response.success ? '200 OK Success!' : '404 Fail!' } {response.success ? '+' : '-'}{url.length} points</h4>
-                    <h4>{response.url}</h4>
-                  </div>
-                  <Button handleClick={handleTryAgain}>Try Again</Button>
-                </div>
-              }
+              {currentPlayer && (
+                <Players
+                  players={players}
+                  currentPlayerId={currentPlayer.id}
+                  playerTurnId={"20224db3-ff55-4e99-9e88-a55d4c7a2f69"}
+                />
+              )}
             </div>
 
-            <div className="rounded-br-lg overflow-y-hidden">
-              <div className="p-5 h-full overflow-y-auto bg-gray-200">
-                <Players players={players} />
-              </div>
+            {room && currentPlayer && (
+              <Game
+                room={room}
+                players={players}
+                rounds={rounds}
+                currentPlayer={currentPlayer}
+              />
+            )}
+          </Container>
+
+          <div className="overflow-y-hidden">
+            <div className="p-5 h-full overflow-y-auto bg-gray-200">
+              <Rounds rounds={rounds} />
             </div>
           </div>
+        </div>
       </main>
-    </div>
+    </Page>
   );
 };
 
