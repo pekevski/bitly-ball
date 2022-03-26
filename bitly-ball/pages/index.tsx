@@ -1,5 +1,6 @@
 import Head from "next/head";
 import React, { useState } from "react";
+import DashboardHeader from "../components/dashboard/Header";
 import { Page } from "../components/Layout/Page";
 
 export default function Home() {
@@ -11,7 +12,9 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="lg:p-10 h-full w-full">
+      <main className="h-full w-full">
+        <DashboardHeader />
+        
         Supabase auth goes here.
       </main>
 
