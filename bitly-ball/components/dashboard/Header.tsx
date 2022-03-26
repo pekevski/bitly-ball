@@ -3,7 +3,7 @@ export default function DashboardHeader() {
     <div className="p-5 text-white bg-blue-500">
       <div className="text-4xl font-bold tracking-wider text-center">
         <a href="#">
-          <h1 className="font-bitlyTitle text-6xl p-5 text-center hover:animate-bounce">
+          <h1 className="font-bitlyTitle text-6xl p-5 text-center" >
             ⚽ Bitly Ball
           </h1>
         </a>
