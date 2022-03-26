@@ -17,8 +17,10 @@ export default function Dashboard() {
 
       <div>
           <DashboardHeader />
-          <CreateRoom />
-          <JoinRoom />
+          <div className="flex">
+            <CreateRoom />
+            <JoinRoom />
+          </div>
       </div>
 
       <footer className="flex items-center justify-center w-full h-24 border-t">

@@ -31,14 +31,16 @@ export default function LoginPage() {
       <main className="h-full w-full">
         <DashboardHeader />
         
-        <Auth
-          supabaseClient={supabaseClient}
-          // providers={['google']}
-          socialLayout="horizontal"
-          socialButtonSize="xlarge"
-          magicLink={true}
-        />
-        {error && <p>{error.message}</p>}
+        <div className="p-5 my-10 bg-white border w-full md:w-6/12">
+          <Auth
+            supabaseClient={supabaseClient}
+            // providers={['google']}
+            socialLayout="horizontal"
+            socialButtonSize="xlarge"
+            magicLink={true}
+            />
+          {error && <p>{error.message}</p>}
+        </div>
       </main>
 
       <footer className="flex items-center justify-center w-full h-24 border-t">

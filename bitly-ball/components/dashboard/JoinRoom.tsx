@@ -60,8 +60,8 @@ export default function JoinRoom() {
   };
 
   return (
-    <div className="p-5 bg-white border">
-      <form action="#" className="flex flex-col space-y-5">
+    <div className="p-5 my-10 bg-white border w-full md:w-6/12">
+      <form action="#" className="flex flex-col space-y-5 mb-5">
         <h3 className="text-2xl font-semibold text-gray-700">Join a room</h3>
         <div className="flex flex-col space-y-1">
           <label
@@ -100,7 +100,7 @@ export default function JoinRoom() {
         Join
       </Button>
       {error && (
-        <h1 className="text-red-400">
+        <h1 className="text-red-400 mt-5">
           <span className="pr-2">🚫</span> {error}
         </h1>
       )}{" "}
