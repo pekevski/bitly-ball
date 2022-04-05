@@ -17,20 +17,16 @@ const Players: React.FC<PlayersProps> = ({
   } else {
     return (
       <>
-        <div className="m-2 flex items-center">
-          <h4 className="mx-4">{players.length} Players</h4>
+        <div className="flex flex-col">
+          <h4 className="">Players: {players.length}</h4>
           {players.map((player) => (
             <div
               key={player.id}
-              className="border rounded-lg border-black p-1 m-1"
+              className="border p-1 my-1"
             >
-              <h1>{player.name}</h1>
-              <p>Host: {player?.isHost ? "Host" : "Guest"}</p>
+              <h1>{player?.isHost ? "👑" : "👤"} {player.name} {currentPlayerId === player.id ? "⬅️" : ""}</h1>
               {playerTurnId && player.id === playerTurnId && (
-                <h5 className="text-green">Current Turn</h5>
-              )}
-              {currentPlayerId && player.id === currentPlayerId && (
-                <h5 className="font-green">ME</h5>
+                <h5>✨</h5>
               )}
             </div>
           ))}

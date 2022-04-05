@@ -113,10 +113,6 @@ export const Game: React.FC<GameProps> = ({
   if (gameReadyToStart) {
     return (
       <>
-        <div>
-          <h1 className="text-center">Game Lobby</h1>
-        </div>
-
         {currentPlayer.isHost && (
           <div className="p-5 align-bottom">
             <Button handleClick={handleStartGame} disabled={!canStart}>
@@ -126,8 +122,8 @@ export const Game: React.FC<GameProps> = ({
         )}
 
         {!currentPlayer.isHost && (
-          <div className="p-5 align-bottom">
-            <h2>Waiting for host</h2>
+          <div className="py-5 align-bottom">
+            <h2>Have a drink while you wait...🍸🍻🥂🍷🥃</h2>
           </div>
         )}
       </>

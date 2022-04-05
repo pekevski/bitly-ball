@@ -29,6 +29,10 @@ const RoomPage: React.FC<RoomPageProps> = () => {
     }
   }, [roomId]);
 
+  useEffect(() => {
+    // get latest round and do things...
+  }, [rounds])
+
   return (
     <Page>
       <Head>
@@ -41,23 +45,22 @@ const RoomPage: React.FC<RoomPageProps> = () => {
           <Container>
             <div className="flex flex-col">
               <div className="flex justify-between">
-                <h1 className="font-bitlyTitle text-6xl p-5">Bitly Ball</h1>
-
                 {!!room && (
                   <div className="p-5 border-bottom-5">
                     <h2>Status: {room.status}</h2>
                     <h2>Rounds: {room.rounds}</h2>
+
+                    {/* Show the players of the game and ordering */}
+                    {currentPlayer && (
+                      <Players
+                        players={players}
+                        currentPlayerId={currentPlayer.id}
+                        playerTurnId={"20224db3-ff55-4e99-9e88-a55d4c7a2f69"}
+                      />
+                    )}
                   </div>
                 )}
               </div>
-
-              {currentPlayer && (
-                <Players
-                  players={players}
-                  currentPlayerId={currentPlayer.id}
-                  playerTurnId={"20224db3-ff55-4e99-9e88-a55d4c7a2f69"}
-                />
-              )}
             </div>
 
             {room && currentPlayer && (
