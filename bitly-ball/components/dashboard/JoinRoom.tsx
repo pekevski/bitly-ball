@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { savePlayerLocalStorage } from "../../lib/LocalStorage";
-import { fetchRoom, createPlayer } from "../../lib/Repository";
+import { fetchRoom, createPlayer, fetchPlayerByUserIdAndRoomId } from "../../lib/Repository";
 import { Room, RoomStatusEnum } from "../../types/Room";
 import { useRouter } from 'next/router'
 import Button from "../Button";
+import { useUser } from "@supabase/supabase-auth-helpers/react";
 
 export default function JoinRoom() {
   const router = useRouter();
+  const { user } = useUser();
+
   const [playerName, setPlayerName] = useState<string>("");
   const [roomId, setRoomId] = useState<string>("");
   const [error, setError] = useState<string | undefined>(undefined);
@@ -21,13 +24,16 @@ export default function JoinRoom() {
         throw new Error("Please provide a player name");
       } else if (playerName.length <= 2) {
         throw new Error("Player name must be more than 2 characters");
-      }
+      } else if (!user?.id) {
+        throw new Error("Something went wrong. Please login to Bitly Ball");
+      } 
 
-      const roomToJoin: Room | null | undefined = await fetchRoom(
+      const roomToJoin = await fetchRoom(
         roomId,
         undefined
       );
 
+      // Cant join room if it is not created or already inprogress
       if (!roomToJoin) {
         throw new Error(
           `Room ${roomId} does not exist. Please try join another room`
@@ -40,12 +46,15 @@ export default function JoinRoom() {
 
       setError(undefined);
 
-      // Cant join room if it is not created or already inprogress
-      const player = await createPlayer({
-        name: playerName,
-        roomId: roomId,
-        isHost: false,
-      });
+      let player = await fetchPlayerByUserIdAndRoomId(user.id, roomToJoin.id)
+
+      if (!player) {
+        player = await createPlayer({
+          name: playerName,
+          roomId: roomId,
+          isHost: false,
+        });
+      }
 
       if (player) {
         await savePlayerLocalStorage(player);

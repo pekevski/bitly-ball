@@ -72,6 +72,26 @@ import { supabase } from "./SupbaseConfig";
       console.log('error', error)
     }
   }
+
+    /**
+     * Fetch the room
+     */
+     export const fetchPlayerByUserIdAndRoomId = async (userId: string, roomId: string) => {
+      try {
+        console.log('Fetching player in room....')
+        
+        let { body } = await supabase
+          .from<Player>('player')
+          .select("*")
+          .eq('roomId', roomId)
+          .eq('userId', userId)
+          .single();
+
+        return body
+      } catch (error) {
+        console.log('error', error)
+      }
+    }
   
   /**
    * Insert a new room into the DB
@@ -91,7 +111,23 @@ import { supabase } from "./SupbaseConfig";
    * @param {Player} player The player to create
    */
   export const createPlayer = async (player: Partial<Player>) => {
+    
     try {
+      // TODO: put me into a business service.
+      if (!player.userId) {
+        throw new Error("Cannot create player without logging in to Bitly. Missing user")
+      }
+
+      if (!player.roomId) {
+        throw new Error("Cannot create player without logging in to Bitly. Missing room")
+      }
+
+      const roomHasPlayer = await fetchPlayerByUserIdAndRoomId(player.userId, player.roomId);
+
+      if (roomHasPlayer) {
+        throw new Error(`User: ${player.userId} already exists in room: ${player.roomId}`)
+      }
+
       let { body } = await supabase.from<Player>('player').insert(player).single();
       return body
     } catch (error) {

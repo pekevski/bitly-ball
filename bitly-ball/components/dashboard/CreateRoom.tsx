@@ -1,3 +1,4 @@
+import { useUser } from "@supabase/supabase-auth-helpers/react";
 import { Router, useRouter } from "next/router";
 import { useState } from "react";
 import { savePlayerLocalStorage } from "../../lib/LocalStorage";
@@ -7,7 +8,8 @@ import NumberCounter from "../NumberCounter";
 
 export default function CreateRoom() {
   const router = useRouter();
-    
+  const { user } = useUser();
+
   const [playerName, setPlayerName] = useState<string>("");
   const [rounds, setRounds] = useState<number>(3);
   const [error, setError] = useState<string | undefined>(undefined);
@@ -20,7 +22,9 @@ export default function CreateRoom() {
         throw new Error("Please provide a player name");
       } else if (playerName.length <= 2) {
         throw new Error("Player name must be more than 2 characters");
-      }
+      } else if (!user?.id) {
+        throw new Error("Something went wrong. Please login to Bitly Ball")
+      } 
 
       setError(undefined);
 
@@ -29,6 +33,7 @@ export default function CreateRoom() {
       if (room) {
         const player = await createPlayer({
           name: playerName,
+          userId: user.id,
           roomId: room.id,
           isHost: true,
         });
