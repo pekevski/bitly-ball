@@ -4,7 +4,7 @@ import { fetchRoom, createPlayer, fetchPlayerByUserIdAndRoomId } from "../../lib
 import { Room, RoomStatusEnum } from "../../types/Room";
 import { useRouter } from 'next/router'
 import Button from "../Button";
-import { useUser } from "@supabase/supabase-auth-helpers/react";
+import { UserProvider, useUser } from "@supabase/supabase-auth-helpers/react";
 
 export default function JoinRoom() {
   const router = useRouter();
@@ -52,6 +52,7 @@ export default function JoinRoom() {
         player = await createPlayer({
           name: playerName,
           roomId: roomId,
+          userId: user.id,
           isHost: false,
         });
       }
