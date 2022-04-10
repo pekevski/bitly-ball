@@ -13,14 +13,18 @@ export const useStore = (props: StoreProps) => {
   const [room, setRoom] = useState<Room | undefined>(undefined);
   const [players, setPlayers] = useState<Player[]>([])
   const [rounds, setRounds] = useState<Round[]>([])
+  
   const [newRoom, handleNewRoom] = useState<Room | undefined>(undefined)
-  const [updatedRoom, handleUpdatedRoom] = useState<Room>();
-  const [deletedRoom, handleDeletedRoom] = useState(null)
-  const [deletedPlayer, handleDeletedPlayer] = useState<any>(null)
-  const [updatedPlayer, handleUpdatedPlayer] = useState(null)
+  const [updatedRoom, handleUpdatedRoom] = useState<Room | undefined>(undefined);
+  const [deletedRoom, handleDeletedRoom] = useState<Room | undefined>(undefined)
+  
   const [newPlayer, handleNewPlayer] = useState<Player | undefined>(undefined)
+  const [deletedPlayer, handleDeletedPlayer] = useState<Player | undefined>(undefined)
+  const [updatedPlayer, handleUpdatedPlayer] = useState<Player | undefined>(undefined)
+  
   const [newRound, handleNewRound] = useState<Round | undefined>(undefined)
-  const [deletedRound, handleDeletedRound] = useState(null)
+  const [deletedRound, handleDeletedRound] = useState<Round | undefined>(undefined)
+  const [updatedRound, handleUpdatedRound] = useState<Round | undefined>(undefined);
 
   // Load initial data and set up listeners
   useEffect(() => {
@@ -47,6 +51,7 @@ export const useStore = (props: StoreProps) => {
     const roundListener = supabase
       .from<Round>('round') // TODO: improve listener `round:roomId=eq.${props.roomId}`)
       .on('INSERT', (payload) => handleNewRound(payload.new))
+      .on('UPDATE', (payload) => handleUpdatedRound(payload.new))
       .on('DELETE', (payload) => handleDeletedRound(payload.old))
       .subscribe()
 
@@ -101,6 +106,23 @@ export const useStore = (props: StoreProps) => {
       console.log('new round triggered', newRound, rounds)
     }
   }, [newRound])
+
+  useEffect(() => {
+    console.log('round triggered', updatedRound);
+
+    if (updatedRound && updatedRound.id === props.roomId) {
+
+      // find the round in our list of rounds and update it
+      const roundsCopy = [...rounds];
+      let roundCopyIndex = roundsCopy.findIndex(r => r.id = updatedRound.id);
+
+      if (roundCopyIndex > -1) {
+        roundsCopy[roundCopyIndex] =updatedRound
+        setRounds(roundsCopy);
+        console.log('updated round triggered', updatedRound);
+      }
+    }
+  }, [updatedRound])
 
   return {
     room,

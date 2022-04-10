@@ -25,6 +25,7 @@ import { supabase } from "./SupbaseConfig";
       return body
     } catch (error) {
       console.log('error', error)
+      throw error;
     }
   }
   
@@ -48,6 +49,7 @@ import { supabase } from "./SupbaseConfig";
       return body
     } catch (error) {
       console.log('error', error)
+      throw error;
     }
   }
   
@@ -70,6 +72,7 @@ import { supabase } from "./SupbaseConfig";
       return body
     } catch (error) {
       console.log('error', error)
+      throw error;
     }
   }
 
@@ -90,6 +93,7 @@ import { supabase } from "./SupbaseConfig";
         return body
       } catch (error) {
         console.log('error', error)
+        throw error;
       }
     }
   
@@ -103,6 +107,7 @@ import { supabase } from "./SupbaseConfig";
       return body
     } catch (error) {
       console.log('error', error)
+      throw error;
     }
   }
   
@@ -132,6 +137,7 @@ import { supabase } from "./SupbaseConfig";
       return body
     } catch (error) {
       console.log('error', error)
+      throw error;
     }
   }
   
@@ -145,6 +151,22 @@ import { supabase } from "./SupbaseConfig";
       return body
     } catch (error) {
       console.log('error', error)
+      throw error;
+    }
+  }
+
+  export const updateRound = async (round: Partial<Round>) => {
+    try {
+      let { body } = await supabase
+        .from<Round>('round')
+        .update(round)
+        .match({id: round.id})
+        .single();
+
+      return body
+    } catch (error) {
+      console.log('error', error)
+      throw error;
     }
   }
   
@@ -154,10 +176,12 @@ import { supabase } from "./SupbaseConfig";
         .from<Room>('room')
         .update({status: RoomStatusEnum.INPROGRESS})
         .match({ id: roomId })
+        .single();
   
       return body
     } catch (error) {
       console.log('error', error)
+      throw error;
     }
   }
   
