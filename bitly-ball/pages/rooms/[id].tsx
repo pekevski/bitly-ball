@@ -1,4 +1,3 @@
-import Head from "next/head";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Players from "../../components/Players";
@@ -35,11 +34,6 @@ const RoomPage: React.FC<RoomPageProps> = () => {
 
   return (
     <Page>
-      <Head>
-        <title>Bitly Ball</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
       <main className="h-full w-full">
         <div className="flex lg:flex-row flex-col h-full">
           <Container>

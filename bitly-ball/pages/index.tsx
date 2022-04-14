@@ -5,6 +5,7 @@ import { Page } from "../components/Layout/Page";
 import { useUser, Auth } from '@supabase/supabase-auth-helpers/react';
 import { supabaseClient } from '@supabase/supabase-auth-helpers/nextjs';
 import { useRouter } from "next/router";
+import { Footer } from "../components/Layout/Footer";
 
 export default function LoginPage() {
   const { user, isLoading, error } = useUser();
@@ -18,16 +19,11 @@ export default function LoginPage() {
   }, [user, router]);
 
   if (isLoading) {
-    return <h1>LOADING...</h1>
+    return <h1>⚽ Loading...</h1>
   }
 
   return (
     <Page>
-      <Head>
-        <title>Bitly Ball</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
       <main className="h-full w-full">
         <DashboardHeader />
         
@@ -43,16 +39,7 @@ export default function LoginPage() {
         </div>
       </main>
 
-      <footer className="flex items-center justify-center w-full h-24 border-t">
-        <a
-          className="flex items-center justify-center"
-          href="https://pekevski.com"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Created by Daniel Pekevski
-        </a>
-      </footer>
+      <Footer />
     </Page>
   );
 }

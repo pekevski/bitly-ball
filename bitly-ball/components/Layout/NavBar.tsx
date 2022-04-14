@@ -8,7 +8,7 @@ export const NavBar: React.FC<NavBarProps> = () => {
   const {user, error} = useUser()
 
   return (
-    <nav >
+    <nav>
       <div className="mx-auto max-w-6xl px-6">
         <div className="flex justify-between align-center flex-row py-4 md:py-6 relative">
           <div className="flex flex-1 items-center">
