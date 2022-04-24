@@ -21,6 +21,10 @@ const RoomPage: React.FC<RoomPageProps> = () => {
     undefined
   );
 
+  // Get the current player from local storage if we revisit this
+  // page. Everytime we join a game as a user we store their info
+  // in local storage. If we refresh the page / or navigate to the room
+  // again, we can repurpose the player in local storage.
   useEffect(() => {
     const curr = getPlayerLocalStorage();
     if (curr?.roomId === roomId) {
@@ -28,6 +32,7 @@ const RoomPage: React.FC<RoomPageProps> = () => {
     }
   }, [roomId]);
 
+  // When we revisit the room again, try and fetch all round information.
   useEffect(() => {
     // get latest round and do things...
   }, [rounds])
