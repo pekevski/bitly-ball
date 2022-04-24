@@ -1,7 +1,7 @@
-import Image from "next/image";
-import useSWR, { SWRConfiguration } from "swr";
-import { ScreenshotResponse } from "../types/ScreenshotResponse";
-import Loader from "./Loader";
+import Image from 'next/image';
+import useSWR, { SWRConfiguration } from 'swr';
+import { ScreenshotResponse } from '../types/ScreenshotResponse';
+import Loader from './Loader';
 
 type BitlyImageProps = {
   url: string;
@@ -18,7 +18,7 @@ const useBitlyImage = (urlInput: string) => {
 
   const config: Partial<SWRConfiguration<ScreenshotResponse, Error>> = {
     revalidateOnFocus: false,
-    refreshWhenHidden: false,
+    refreshWhenHidden: false
   };
 
   const { data, error } = useSWR<ScreenshotResponse, any>(
@@ -30,7 +30,7 @@ const useBitlyImage = (urlInput: string) => {
   return {
     response: data,
     loading: !error && !data,
-    error: error,
+    error: error
   };
 };
 
@@ -39,7 +39,7 @@ const BitlyImage: React.FC<BitlyImageProps> = ({
   width,
   height,
   handleSuccess,
-  handleLoading,
+  handleLoading
 }) => {
   const { response, loading, error } = useBitlyImage(url);
 

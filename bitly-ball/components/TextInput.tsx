@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
 type TextInputProps = {
   loading: boolean;
@@ -6,7 +6,7 @@ type TextInputProps = {
 };
 
 const TextInput: React.FC<TextInputProps> = (props) => {
-  const [textInput, setTextInput] = useState<string>("");
+  const [textInput, setTextInput] = useState<string>('');
 
   const onSubmit = (event: React.FormEvent, text: string) => {
     event.preventDefault();
@@ -41,7 +41,7 @@ const TextInput: React.FC<TextInputProps> = (props) => {
           className="disabled:opacity-50 bg-blue-500 hover:bg-blue-400 text-white font-bold p-3 sm:rounded-r-lg sm:rounded-bl-none rounded-b-lg sm:border-l sm:border-t-0 border-t w-full sm:w-32"
           disabled={props.loading || textInput.length === 0}
         >
-          {props.loading ? "Loading..." : "Submit"}
+          {props.loading ? 'Loading...' : 'Submit'}
         </button>
       </div>
     </form>

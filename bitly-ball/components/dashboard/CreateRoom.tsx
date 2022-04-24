@@ -1,31 +1,31 @@
-import { useUser } from "@supabase/supabase-auth-helpers/react";
-import { Router, useRouter } from "next/router";
-import { useState } from "react";
-import { savePlayerLocalStorage } from "../../lib/LocalStorage";
-import { createRoom } from "../../lib/Repository";
-import { createPlayer } from "../../lib/Business"
-import Button from "../Button";
-import NumberCounter from "../NumberCounter";
+import { useUser } from '@supabase/supabase-auth-helpers/react';
+import { Router, useRouter } from 'next/router';
+import { useState } from 'react';
+import { savePlayerLocalStorage } from '../../lib/LocalStorage';
+import { createRoom } from '../../lib/Repository';
+import { createPlayer } from '../../lib/Business';
+import Button from '../Button';
+import NumberCounter from '../NumberCounter';
 
 export default function CreateRoom() {
   const router = useRouter();
   const { user } = useUser();
 
-  const [playerName, setPlayerName] = useState<string>("");
+  const [playerName, setPlayerName] = useState<string>('');
   const [rounds, setRounds] = useState<number>(3);
   const [error, setError] = useState<string | undefined>(undefined);
 
   const handleCreateRoom = async () => {
-    console.log("BITLY => handle Create Room");
+    console.log('BITLY => handle Create Room');
 
     try {
       if (!playerName) {
-        throw new Error("Please provide a player name");
+        throw new Error('Please provide a player name');
       } else if (playerName.length <= 2) {
-        throw new Error("Player name must be more than 2 characters");
+        throw new Error('Player name must be more than 2 characters');
       } else if (!user?.id) {
-        throw new Error("Something went wrong. Please login to Bitly Ball")
-      } 
+        throw new Error('Something went wrong. Please login to Bitly Ball');
+      }
 
       setError(undefined);
 
@@ -36,7 +36,7 @@ export default function CreateRoom() {
           name: playerName,
           userId: user.id,
           roomId: room.id,
-          isHost: true,
+          isHost: true
         });
 
         if (player) {
@@ -53,7 +53,6 @@ export default function CreateRoom() {
   };
 
   return (
-
     <div className="p-5 my-10 bg-white border w-full md:w-6/12">
       <form action="#" className="flex flex-col space-y-5 mb-5">
         <h3 className="text-2xl font-semibold text-gray-700">Create a room</h3>
@@ -82,7 +81,7 @@ export default function CreateRoom() {
             Number of Rounds
           </label>
           <NumberCounter
-            id={"numberOfRounds"}
+            id={'numberOfRounds'}
             min={1}
             max={5}
             value={rounds}

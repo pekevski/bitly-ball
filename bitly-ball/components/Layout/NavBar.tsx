@@ -1,18 +1,18 @@
-import { useUser } from "@supabase/supabase-auth-helpers/react";
+import { useUser } from '@supabase/supabase-auth-helpers/react';
 import Button from '../Button';
 import { useRouter } from 'next/router';
-import Link from '../Link'
+import Link from '../Link';
 
 type NavBarProps = {};
 
 export const NavBar: React.FC<NavBarProps> = () => {
   const router = useRouter();
-  const {user, error} = useUser()
+  const { user, error } = useUser();
 
   const handleUsernameClick = () => {
-    console.log("Clicked username")
-  }
-  
+    console.log('Clicked username');
+  };
+
   return (
     <nav>
       <div className="mx-auto max-w-6xl px-6">
@@ -28,21 +28,16 @@ export const NavBar: React.FC<NavBarProps> = () => {
           <div className="flex flex-1 justify-end items-center space-x-8">
             {user && (
               <>
-                <Button 
-                  disabled={false}
-                  handleClick={handleUsernameClick}
-                >
+                <Button disabled={false} handleClick={handleUsernameClick}>
                   {user?.email}
                 </Button>
 
-                <Link href={`/api/auth/logout`}>
-                  Sign out
-                </Link>
+                <Link href={`/api/auth/logout`}>Sign out</Link>
               </>
             )}
           </div>
         </div>
       </div>
     </nav>
-  )
+  );
 };

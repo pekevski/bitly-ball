@@ -1,37 +1,38 @@
-import { useState } from "react";
-import { savePlayerLocalStorage } from "../../lib/LocalStorage";
-import { fetchRoom, createPlayer, fetchPlayerByUserIdAndRoomId } from "../../lib/Repository";
-import { Room, RoomStatusEnum } from "../../types/Room";
-import { useRouter } from 'next/router'
-import Button from "../Button";
-import { UserProvider, useUser } from "@supabase/supabase-auth-helpers/react";
+import { useState } from 'react';
+import { savePlayerLocalStorage } from '../../lib/LocalStorage';
+import {
+  fetchRoom,
+  createPlayer,
+  fetchPlayerByUserIdAndRoomId
+} from '../../lib/Repository';
+import { Room, RoomStatusEnum } from '../../types/Room';
+import { useRouter } from 'next/router';
+import Button from '../Button';
+import { UserProvider, useUser } from '@supabase/supabase-auth-helpers/react';
 
 export default function JoinRoom() {
   const router = useRouter();
   const { user } = useUser();
 
-  const [playerName, setPlayerName] = useState<string>("");
-  const [roomId, setRoomId] = useState<string>("");
+  const [playerName, setPlayerName] = useState<string>('');
+  const [roomId, setRoomId] = useState<string>('');
   const [error, setError] = useState<string | undefined>(undefined);
 
   const handleJoinRoom = async () => {
-    console.log("BITLY => handle Join Room");
+    console.log('BITLY => handle Join Room');
 
     try {
       if (!roomId) {
-        throw new Error("Please provide a room code");
+        throw new Error('Please provide a room code');
       } else if (!playerName) {
-        throw new Error("Please provide a player name");
+        throw new Error('Please provide a player name');
       } else if (playerName.length <= 2) {
-        throw new Error("Player name must be more than 2 characters");
+        throw new Error('Player name must be more than 2 characters');
       } else if (!user?.id) {
-        throw new Error("Something went wrong. Please login to Bitly Ball");
-      } 
+        throw new Error('Something went wrong. Please login to Bitly Ball');
+      }
 
-      const roomToJoin = await fetchRoom(
-        roomId,
-        undefined
-      );
+      const roomToJoin = await fetchRoom(roomId, undefined);
 
       // Cant join room if it is not created or already inprogress
       if (!roomToJoin) {
@@ -46,14 +47,14 @@ export default function JoinRoom() {
 
       setError(undefined);
 
-      let player = await fetchPlayerByUserIdAndRoomId(user.id, roomToJoin.id)
+      let player = await fetchPlayerByUserIdAndRoomId(user.id, roomToJoin.id);
 
       if (!player) {
         player = await createPlayer({
           name: playerName,
           roomId: roomId,
           userId: user.id,
-          isHost: false,
+          isHost: false
         });
       }
 
@@ -113,7 +114,7 @@ export default function JoinRoom() {
         <h1 className="text-red-400 mt-5">
           <span className="pr-2">🚫</span> {error}
         </h1>
-      )}{" "}
+      )}{' '}
     </div>
   );
 }

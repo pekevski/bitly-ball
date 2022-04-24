@@ -1,5 +1,5 @@
-import { json } from "stream/consumers";
-import { Round } from "../types/Round";
+import { json } from 'stream/consumers';
+import { Round } from '../types/Round';
 import Loader from './Loader';
 
 type RoundsProps = {
@@ -8,10 +8,13 @@ type RoundsProps = {
   roundIndex?: number;
 };
 
-const Rounds: React.FC<RoundsProps> = ({rounds, currentRound, roundIndex}) => {
-  
+const Rounds: React.FC<RoundsProps> = ({
+  rounds,
+  currentRound,
+  roundIndex
+}) => {
   if (!rounds) {
-    return <Loader />
+    return <Loader />;
   } else {
     return (
       <>
@@ -19,11 +22,12 @@ const Rounds: React.FC<RoundsProps> = ({rounds, currentRound, roundIndex}) => {
         <p>Index: {roundIndex}</p>
         <p>{JSON.stringify(currentRound, null, 2)}</p>
 
-        <hr/>
+        <hr />
 
         <h3>Rounds:</h3>
-        {
-          rounds.filter(r => r.result).map((round) => 
+        {rounds
+          .filter((r) => r.result)
+          .map((round) => (
             <div key={round.id} className="border border-red p-5 my-2">
               <h1>{round.id}</h1>
               <p>Phrase: {round.phrase}</p>
@@ -33,12 +37,10 @@ const Rounds: React.FC<RoundsProps> = ({rounds, currentRound, roundIndex}) => {
               <p>Player: {round.playerId}</p>
               <p>Created: {round.createdDate.toString()}</p>
             </div>
-          )
-        }
+          ))}
       </>
-    )
+    );
   }
-
-}
+};
 
 export default Rounds;
