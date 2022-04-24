@@ -117,7 +117,7 @@ export const useStore = (props: StoreProps) => {
       let roundCopyIndex = roundsCopy.findIndex(r => r.id = updatedRound.id);
 
       if (roundCopyIndex > -1) {
-        roundsCopy[roundCopyIndex] =updatedRound
+        roundsCopy[roundCopyIndex] = updatedRound
         setRounds(roundsCopy);
         console.log('updated round triggered', updatedRound);
       }

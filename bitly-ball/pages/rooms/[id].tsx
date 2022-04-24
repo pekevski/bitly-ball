@@ -70,6 +70,7 @@ const RoomPage: React.FC<RoomPageProps> = () => {
                   <div className="border-bottom-5">
                     <h2>Status: {room.status}</h2>
                     <h2>Rounds: {room.rounds}</h2>
+                    {currentRound && <h2>Curent Round: {currentRound.roundIndex + 1}</h2>}
 
                     {/* Show the players of the game and ordering */}
                     {currentPlayer && playerTurnId && (
