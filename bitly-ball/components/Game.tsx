@@ -3,7 +3,8 @@ import { Room, RoomStatusEnum } from "../types/Room";
 import BitlyImage from "./BitlyImage";
 import Button from "./Button";
 import TextInput from "./TextInput";
-import { createRound, startRoom } from "../lib/Repository";
+import { createRound } from "../lib/Repository";
+import { startRoom } from "../lib/Business";
 import React, { useEffect, useState } from "react";
 import { Round } from "../types/Round";
 import { ScreenshotResponse } from "../types/ScreenshotResponse";
@@ -101,7 +102,7 @@ export const Game: React.FC<GameProps> = ({
               </h4>
               <h4>{response.url}</h4>
             </div>
-            <Button handleClick={handleNextRound} disabled={false}>
+            <Button width={'full'} handleClick={handleNextRound} disabled={false}>
               Next Round
             </Button>
           </div>
@@ -114,8 +115,8 @@ export const Game: React.FC<GameProps> = ({
     return (
       <>
         {currentPlayer.isHost && (
-          <div className="p-5 align-bottom">
-            <Button handleClick={handleStartGame} disabled={!canStart}>
+          <div className="py-5 align-bottom">
+            <Button width={'full'} handleClick={handleStartGame} disabled={!canStart}>
               {canStart ? "Start Room" : "Waiting for Players to Join"}
             </Button>
           </div>

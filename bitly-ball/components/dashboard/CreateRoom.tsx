@@ -2,7 +2,8 @@ import { useUser } from "@supabase/supabase-auth-helpers/react";
 import { Router, useRouter } from "next/router";
 import { useState } from "react";
 import { savePlayerLocalStorage } from "../../lib/LocalStorage";
-import { createRoom, createPlayer } from "../../lib/Repository";
+import { createRoom } from "../../lib/Repository";
+import { createPlayer } from "../../lib/Business"
 import Button from "../Button";
 import NumberCounter from "../NumberCounter";
 
@@ -89,7 +90,7 @@ export default function CreateRoom() {
           />
         </div>
       </form>
-      <Button handleClick={handleCreateRoom} disabled={false}>
+      <Button width={'full'} handleClick={handleCreateRoom} disabled={false}>
         Create
       </Button>
       {error && (

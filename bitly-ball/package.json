@@ -13,6 +13,7 @@
     "@supabase/supabase-js": "^1.33.3",
     "@supabase/ui": "^0.36.5",
     "classnames": "2.3.1",
+    "clsx": "^1.1.1",
     "next": "^12.1.5",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",

@@ -106,7 +106,7 @@ export default function JoinRoom() {
           />
         </div>
       </form>
-      <Button handleClick={handleJoinRoom} disabled={false}>
+      <Button width={'full'} handleClick={handleJoinRoom} disabled={false}>
         Join
       </Button>
       {error && (

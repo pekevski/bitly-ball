@@ -116,23 +116,7 @@ import { supabase } from "./SupbaseConfig";
    * @param {Player} player The player to create
    */
   export const createPlayer = async (player: Partial<Player>) => {
-    
     try {
-      // TODO: put me into a business service.
-      if (!player.userId) {
-        throw new Error("Cannot create player without logging in to Bitly. Missing user")
-      }
-
-      if (!player.roomId) {
-        throw new Error("Cannot create player without logging in to Bitly. Missing room")
-      }
-
-      const roomHasPlayer = await fetchPlayerByUserIdAndRoomId(player.userId, player.roomId);
-
-      if (roomHasPlayer) {
-        throw new Error(`User: ${player.userId} already exists in room: ${player.roomId}`)
-      }
-
       let { body } = await supabase.from<Player>('player').insert(player).single();
       return body
     } catch (error) {
@@ -170,11 +154,11 @@ import { supabase } from "./SupbaseConfig";
     }
   }
   
-  export const startRoom = async (roomId: string) => {
+  export const updateRoomStatus = async (roomId: string, toStatus: RoomStatusEnum) => {
     try {
       let { body } = await supabase
         .from<Room>('room')
-        .update({status: RoomStatusEnum.INPROGRESS})
+        .update({status: toStatus})
         .match({ id: roomId })
         .single();
   

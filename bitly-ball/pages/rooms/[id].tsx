@@ -45,7 +45,7 @@ const RoomPage: React.FC<RoomPageProps> = () => {
             <div className="flex flex-col">
               <div className="flex justify-between">
                 {!!room && (
-                  <div className="p-5 border-bottom-5">
+                  <div className="border-bottom-5">
                     <h2>Status: {room.status}</h2>
                     <h2>Rounds: {room.rounds}</h2>
 
