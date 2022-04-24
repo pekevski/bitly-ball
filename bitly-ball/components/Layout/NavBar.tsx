@@ -1,11 +1,23 @@
 import Link from 'next/link';
 import { useUser } from "@supabase/supabase-auth-helpers/react";
+import Button from '../Button';
+import { useRouter } from 'next/router';
 
 type NavBarProps = {};
 
 export const NavBar: React.FC<NavBarProps> = () => {
-
+  const router = useRouter();
   const {user, error} = useUser()
+
+  const handleUsernameClick = () => {
+    console.log("Clicked username")
+  }
+
+  const handleSignOutClick = () => {
+    router.push(`/api/auth/logout`);
+  }
+
+
 
   return (
     <nav>
@@ -22,10 +34,16 @@ export const NavBar: React.FC<NavBarProps> = () => {
           <div className="flex flex-1 justify-end space-x-8">
             {user && (
               <>
-                <h5>{user?.email}</h5>
-                <Link href="/api/auth/logout">
+                <Button 
+                  disabled={false}
+                  handleClick={handleUsernameClick}
+                >
+                  {user?.email}
+                </Button>
+
+                <Button disabled={false} handleClick={handleSignOutClick}>
                   <a>Sign out</a>
-                </Link>
+                </Button>
               </>
             )}
           </div>

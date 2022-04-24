@@ -22,7 +22,7 @@ const Button: React.FC<ButtonProps> = ({handleClick, children, disabled}) => {
         <button
             disabled={disabled}
             onClick={(e) => _handleClick(e)}
-            className="disabled:opacity-50 bg-blue-600 text-gray-100 border-0 px-4 py-2 rounded w-full hover:bg-blue-800 focus:outline-none text-lg font-semibold">
+            className="disabled:opacity-50 bg-blue-600 text-gray-100 border-0 px-4 py-2 rounded w-full hover:bg-blue-800 focus:outline-none text-sm font-semibold">
             {children}
         </button>
     );
