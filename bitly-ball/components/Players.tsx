@@ -24,9 +24,9 @@ const Players: React.FC<PlayersProps> = ({
               key={player.id}
               className="border p-1 my-1"
             >
-              <h1>{player?.isHost ? "👑" : "👤"} {player.name} {currentPlayerId === player.id ? "⬅️" : ""}</h1>
+              <h1>{player?.isHost ? "👑" : "👤"} {player.name} {currentPlayerId === player.id ? "⬅️ (me)" : ""}</h1>
               {playerTurnId && player.id === playerTurnId && (
-                <h5>✨</h5>
+                <h5>✨ (current turn)</h5>
               )}
             </div>
           ))}

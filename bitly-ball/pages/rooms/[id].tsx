@@ -8,6 +8,7 @@ import { Container } from "../../components/Layout/Container";
 import { getPlayerLocalStorage } from "../../lib/LocalStorage";
 import { Player } from "../../types/Player";
 import { Game } from "../../components/Game";
+import { Round } from "../../types/Round";
 
 type RoomPageProps = {};
 
@@ -17,15 +18,28 @@ const RoomPage: React.FC<RoomPageProps> = () => {
   const roomId = query.id as string;
 
   const { room, players, rounds } = useStore({ roomId });
+  
   const [currentPlayer, setCurrentPlayer] = useState<Player | undefined>(
     undefined
   );
+  
+  const [currentRound, setCurrentRound] = useState<Round | undefined>(
+    undefined
+  );
 
-  // Get the current player from local storage if we revisit this
-  // page. Everytime we join a game as a user we store their info
-  // in local storage. If we refresh the page / or navigate to the room
-  // again, we can repurpose the player in local storage.
+  const [playerTurnId, setPlayerTurnId] = useState<string | undefined>(
+    undefined
+  );
+
+  const [roundIndex, setRoundIndex] = useState<number | undefined>(
+    undefined
+  );
+
   useEffect(() => {
+    // Get the current player from local storage if we revisit this
+    // page. Everytime we join a game as a user we store their info
+    // in local storage. If we refresh the page / or navigate to the room
+    // again, we can repurpose the player in local storage.
     const curr = getPlayerLocalStorage();
     if (curr?.roomId === roomId) {
       setCurrentPlayer(curr);
@@ -34,7 +48,15 @@ const RoomPage: React.FC<RoomPageProps> = () => {
 
   // When we revisit the room again, try and fetch all round information.
   useEffect(() => {
-    // get latest round and do things...
+
+    console.log("BITLYBALL: rounds has changed working round stuff out...")
+
+    // Get the current round and players turn from the list of rounds
+    const currentRound = rounds.find(r => !r.result);
+    setPlayerTurnId(currentRound?.playerId);
+    setRoundIndex(currentRound?.roundIndex);
+    setCurrentRound(currentRound ? rounds[currentRound.roundIndex] : undefined)
+
   }, [rounds])
 
   return (
@@ -50,11 +72,11 @@ const RoomPage: React.FC<RoomPageProps> = () => {
                     <h2>Rounds: {room.rounds}</h2>
 
                     {/* Show the players of the game and ordering */}
-                    {currentPlayer && (
+                    {currentPlayer && playerTurnId && (
                       <Players
                         players={players}
                         currentPlayerId={currentPlayer.id}
-                        playerTurnId={"20224db3-ff55-4e99-9e88-a55d4c7a2f69"}
+                        playerTurnId={playerTurnId}
                       />
                     )}
                   </div>
@@ -68,13 +90,19 @@ const RoomPage: React.FC<RoomPageProps> = () => {
                 players={players}
                 rounds={rounds}
                 currentPlayer={currentPlayer}
+                playerTurnId={playerTurnId}
+                roundIndex={roundIndex}
               />
             )}
           </Container>
 
           <div className="overflow-y-hidden">
             <div className="p-5 h-full overflow-y-auto bg-gray-200">
-              <Rounds rounds={rounds} />
+              <Rounds 
+                rounds={rounds} 
+                currentRound={currentRound}
+                roundIndex={roundIndex}
+              />
             </div>
           </div>
         </div>

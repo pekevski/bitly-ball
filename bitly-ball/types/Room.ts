@@ -2,7 +2,7 @@ export type Room = {
     id: string,
     createdDate: Date,
     rounds: number,
-    status: RoomStatusEnum
+    status: RoomStatusEnum,
 }
 
 export enum RoomStatusEnum {

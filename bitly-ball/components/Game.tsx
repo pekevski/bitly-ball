@@ -14,13 +14,17 @@ type GameProps = {
   room: Room;
   players: Player[];
   rounds: Round[];
+  playerTurnId?: string,
+  roundIndex?: number
 };
 
 export const Game: React.FC<GameProps> = ({
   currentPlayer,
+  playerTurnId,
   room,
   players,
   rounds,
+  roundIndex
 }) => {
   const [url, setUrl] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -64,11 +68,12 @@ export const Game: React.FC<GameProps> = ({
 
   const handleStartGame = () => {
     console.log("BITLY => Starting Room");
-    startRoom(room.id);
+    startRoom(room.id, room.rounds, players);
   };
 
   const gameInProgress = room?.status === RoomStatusEnum.INPROGRESS;
   const gameReadyToStart = room?.status === RoomStatusEnum.CREATED;
+  const currentPlayerTurn = currentPlayer?.id === playerTurnId;
   const canStart = players.length > 1;
 
   if (gameInProgress) {
@@ -86,7 +91,7 @@ export const Game: React.FC<GameProps> = ({
           </div>
         )}
 
-        {!response && (
+        {!response && currentPlayerTurn && (
           <div className="p-5 align-bottom">
             <TextInput handleSubmit={setUrl} loading={loading} />
           </div>

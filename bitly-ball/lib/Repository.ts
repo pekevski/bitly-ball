@@ -43,7 +43,7 @@ import { supabase } from "./SupbaseConfig";
         .from<Round>('round')
         .select("*")
         .eq('roomId', roomId)
-        .order('created_at', {ascending: true});
+        .order('createdDate', {ascending: true});
         
       if (setState) setState(body)
       return body
@@ -126,12 +126,26 @@ import { supabase } from "./SupbaseConfig";
   }
   
   /**
-   * Insert a new player into the DB
-   * @param {Player} player The player to create
+   * Insert a new round into the DB
+   * @param {Round} round The round to create
    */
   export const createRound = async (round: Partial<Round>) => {
     try {
       let { body } = await supabase.from<Round>('round').insert(round).single();
+      return body
+    } catch (error) {
+      console.log('error', error)
+      throw error;
+    }
+  }
+
+  /**
+   * Insert a many new rounds into the DB
+   * @param {Round[]} rounds The rounds to create
+   */
+   export const createManyRounds = async (rounds: Array<Partial<Round>>) => {
+    try {
+      let { body } = await supabase.from<Round>('round').insert(rounds);
       return body
     } catch (error) {
       console.log('error', error)
@@ -154,12 +168,12 @@ import { supabase } from "./SupbaseConfig";
     }
   }
   
-  export const updateRoomStatus = async (roomId: string, toStatus: RoomStatusEnum) => {
+  export const updateRoom = async (room: Partial<Room>) => {
     try {
       let { body } = await supabase
         .from<Room>('room')
-        .update({status: toStatus})
-        .match({ id: roomId })
+        .update(room)
+        .match({ id: room.id })
         .single();
   
       return body
