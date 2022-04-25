@@ -6,6 +6,7 @@ import { createRoom } from '../../lib/Repository';
 import { createPlayer } from '../../lib/Business';
 import Button from '../Button';
 import NumberCounter from '../NumberCounter';
+import clsx from 'clsx';
 
 export default function CreateRoom() {
   const router = useRouter();
@@ -69,7 +70,8 @@ export default function CreateRoom() {
             autoFocus={true}
             value={playerName}
             onChange={(e) => setPlayerName(e.target.value)}
-            className="px-4 py-2 transition duration-300 border border-gray-300 rounded focus:border-transparent focus:outline-none focus:ring-4 focus:ring-blue-200"
+            className={clsx(
+              "px-4","py-2","transition","duration-300","border","border-gray-300","rounded","focus:border-transparent","focus:outline-none","focus:ring-4","focus:ring-blue-200")}
           />
         </div>
 
