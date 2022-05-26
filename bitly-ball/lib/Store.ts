@@ -62,7 +62,7 @@ export const useStore = (props: StoreProps) => {
     // Listen for new and deleted rounds
     const roundListener = supabase
       .from<Round>('round') // TODO: improve listener `round:roomId=eq.${props.roomId}`)
-      .on('INSERT', (payload) => handleNewRound(payload.new))
+      // .on('INSERT', (payload) => handleNewRound(payload.new))
       .on('UPDATE', (payload) => handleUpdatedRound(payload.new))
       .on('DELETE', (payload) => handleDeletedRound(payload.old))
       .subscribe();
@@ -106,7 +106,6 @@ export const useStore = (props: StoreProps) => {
     }
   }, [updatedRoom]);
 
-  // Updated rounds received from Postgres
   useEffect(() => {
     console.log('new round triggered', newRound);
 
@@ -118,10 +117,11 @@ export const useStore = (props: StoreProps) => {
     }
   }, [newRound]);
 
+  // Updated rounds received from Postgres
   useEffect(() => {
     console.log('round triggered', updatedRound);
 
-    if (updatedRound && updatedRound.id === props.roomId) {
+    if (updatedRound && updatedRound.roomId === props.roomId) {
       // find the round in our list of rounds and update it
       const roundsCopy = [...rounds];
       let roundCopyIndex = roundsCopy.findIndex(

@@ -46,13 +46,13 @@ const RoomPage: React.FC<RoomPageProps> = () => {
 
   // When we revisit the room again, try and fetch all round information.
   useEffect(() => {
-    console.log('BITLYBALL: rounds has changed working round stuff out...');
+    console.log('BITLYBALL: rounds has changed working round stuff out...', rounds);
 
     // Get the current round and players turn from the list of rounds
-    const currentRound = rounds.find((r) => !r.result);
+    const currentRound = rounds.find((r) => r.submitted === false);
     setPlayerTurnId(currentRound?.playerId);
     setRoundIndex(currentRound?.roundIndex);
-    setCurrentRound(currentRound ? rounds[currentRound.roundIndex] : undefined);
+    setCurrentRound(currentRound);
   }, [rounds]);
 
   return (
@@ -88,6 +88,7 @@ const RoomPage: React.FC<RoomPageProps> = () => {
                 room={room}
                 players={players}
                 rounds={rounds}
+                currentRound={currentRound}
                 currentPlayer={currentPlayer}
                 playerTurnId={playerTurnId}
                 roundIndex={roundIndex}

@@ -41,7 +41,7 @@ export const fetchRounds = async (roomId: string, setState: any) => {
       .from<Round>('round')
       .select('*')
       .eq('roomId', roomId)
-      .order('createdDate', { ascending: true });
+      .order('roundIndex', { ascending: true });
 
     if (setState) setState(body);
     return body;

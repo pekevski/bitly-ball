@@ -3,6 +3,7 @@
 import { Player } from '../types/Player';
 import { RoomStatusEnum } from '../types/Room';
 import { Round } from '../types/Round';
+import { ScreenshotResponse } from '../types/ScreenshotResponse';
 import * as database from './Repository';
 
 // Starts a room for all players when the host is ready to begin
@@ -49,6 +50,36 @@ export const startRoom = async (
     throw e;
   }
 };
+
+export const submitRound = async (
+  roundId: string,
+  url: string,
+  response: ScreenshotResponse
+): Promise<Round> => {
+
+  try {
+
+    const newRound: Partial<Round> = {
+      id: roundId,
+      points: response.success ? url.length : -url.length,
+      phrase: url,
+      image: `data:image/jpeg;charset=utl-8;base64,${response.image}`,
+      result: response.success,
+      submitted: true
+    };
+
+    const result = await database.updateRound(newRound);
+
+    if (!result) {
+      throw new Error(`Updating round ${newRound.id} failed`)
+    }
+
+    return result;
+  } catch (e) {
+    console.error(e)
+    throw e;
+  }
+}
 
 // Create a player for a room
 export const createPlayer = async (

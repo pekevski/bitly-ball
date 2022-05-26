@@ -3,7 +3,7 @@ import { Room, RoomStatusEnum } from '../types/Room';
 import BitlyImage from './BitlyImage';
 import Button from './Button';
 import TextInput from './TextInput';
-import { createRound } from '../lib/Repository';
+import { submitRound } from '../lib/Business';
 import { startRoom } from '../lib/Business';
 import React, { useEffect, useState } from 'react';
 import { Round } from '../types/Round';
@@ -14,6 +14,7 @@ type GameProps = {
   room: Room;
   players: Player[];
   rounds: Round[];
+  currentRound?: Round;
   playerTurnId?: string;
   roundIndex?: number;
 };
@@ -24,6 +25,7 @@ export const Game: React.FC<GameProps> = ({
   room,
   players,
   rounds,
+  currentRound,
   roundIndex
 }) => {
   const [url, setUrl] = useState<string>('');
@@ -34,29 +36,38 @@ export const Game: React.FC<GameProps> = ({
 
   useEffect(() => {
     console.log('BITLY BALL => response changed..');
-    // TODO: check if round for this data already exists?
-    if (response) {
+    // We got a image response lets update the current round
+    // with the resulting data of the response.
+    // Calculate points, calculate round.
+    if (response && currentRound) {
       const _createRound = async (
         response: ScreenshotResponse
       ): Promise<void> => {
         try {
-          const currentRound: Partial<Round> = {
-            playerId: '1f274bc7-a4bb-44c2-b180-6c4b054e36fe',
-            roomId: room.id,
-            points: url.length,
-            phrase: url,
-            image: `data:image/jpeg;charset=utl-8;base64,${response.image}`,
-            result: !!response.success
-          };
 
-          await createRound(currentRound);
+          console.log('BITLY BALL => called promise for update round');
+
+          await submitRound(
+            currentRound.id,
+            url,
+            response
+          );
         } catch (e) {
+          // TODO Handle error when we cant update the round, maybe we put the
+          // phrase back and ask them to try again?
           console.log('Error creating round', e);
         }
       };
 
-      console.log('BITLY BALL => response changed AND cause a create round');
+      console.log('BITLY BALL => response changed AND caused a create round');
       _createRound(response);
+    } else {
+
+      // Response is undefined, if we have a current round lets
+      // move on to the next round in the game.
+      console.log('BITLY BALL => response is undefined');
+      // Do we need to do anything, replication should know this since rounds
+      // have changed....
     }
   }, [response]);
 

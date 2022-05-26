@@ -8,4 +8,5 @@ export type Round = {
   createdDate: Date;
   result: boolean;
   image: string;
+  submitted: boolean;
 };
