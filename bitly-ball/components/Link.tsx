@@ -1,10 +1,10 @@
 import NextLink from 'next/link';
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import clsx from 'clsx';
 
-type LinkProps = {
+type LinkProps = PropsWithChildren<{
   href: string;
-};
+}>;
 
 const Link: React.FC<LinkProps> = ({ children, href }) => {
   return (

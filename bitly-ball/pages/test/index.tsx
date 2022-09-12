@@ -9,11 +9,10 @@ import { supabase } from '../../lib/SupabaseConfig';
 export default function Dashboard() {
   return (
     <Page signOut={supabase.auth.signOut}>
-      <DashboardHeader />
+
 
       <div className="flex">
-        <CreateRoom />
-        <JoinRoom />
+        TEST
       </div>
 
       <Footer />

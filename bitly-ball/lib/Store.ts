@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Player } from '../types/Player';
 import { Round } from '../types/Round';
 import { Room } from '../types/Room';
-import { supabase } from './SupbaseConfig';
+import { supabase } from './SupabaseConfig';
 import { fetchPlayers, fetchRoom, fetchRounds } from './Repository';
 
 type StoreProps = {

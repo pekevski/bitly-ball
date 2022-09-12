@@ -1,17 +1,35 @@
-import { useUser } from '@supabase/supabase-auth-helpers/react';
 import Button from '../Button';
 import { useRouter } from 'next/router';
 import Link from '../Link';
+import { Auth } from '@supabase/ui';
+import { ApiError } from '@supabase/supabase-js';
 
-type NavBarProps = {};
+type NavBarProps = {
+  signOut: () => Promise<{ error: ApiError | null }>
+};
 
-export const NavBar: React.FC<NavBarProps> = () => {
-  const router = useRouter();
-  const { user, error } = useUser();
+export const NavBar: React.FC<NavBarProps> = (props) => {
+  const { user } = Auth.useUser();
 
   const handleUsernameClick = () => {
     console.log('Clicked username');
   };
+
+  const handleSignOutClick = async () => {
+    const { error } = await props.signOut();
+  };
+
+  const userControls = user && (
+    <>
+      <Button disabled={false} handleClick={handleUsernameClick}>
+        {user?.email}
+      </Button>
+
+      <Button disabled={false} handleClick={handleSignOutClick}>
+        Sign out
+      </Button>
+    </>
+  )
 
   return (
     <nav>
@@ -26,15 +44,7 @@ export const NavBar: React.FC<NavBarProps> = () => {
           </div>
 
           <div className="flex flex-1 justify-end items-center space-x-8">
-            {user && (
-              <>
-                <Button disabled={false} handleClick={handleUsernameClick}>
-                  {user?.email}
-                </Button>
-
-                <Link href={`/api/auth/logout`}>Sign out</Link>
-              </>
-            )}
+            {userControls}
           </div>
         </div>
       </div>

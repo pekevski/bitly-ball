@@ -5,14 +5,14 @@ import {
   createPlayer,
   fetchPlayerByUserIdAndRoomId
 } from '../../lib/Repository';
-import { Room, RoomStatusEnum } from '../../types/Room';
+import { RoomStatusEnum } from '../../types/Room';
 import { useRouter } from 'next/router';
 import Button from '../Button';
-import { UserProvider, useUser } from '@supabase/supabase-auth-helpers/react';
+import { Auth } from '@supabase/ui';
 
 export default function JoinRoom() {
   const router = useRouter();
-  const { user } = useUser();
+  const { user } = Auth.useUser();
 
   const [playerName, setPlayerName] = useState<string>('');
   const [roomId, setRoomId] = useState<string>('');

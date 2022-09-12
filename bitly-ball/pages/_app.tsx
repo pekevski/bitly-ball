@@ -1,13 +1,13 @@
 import 'tailwindcss/tailwind.css';
 import type { AppProps } from 'next/app';
-import { UserProvider } from '@supabase/supabase-auth-helpers/react';
-import { supabaseClient } from '@supabase/supabase-auth-helpers/nextjs';
+import { supabase } from '../lib/SupabaseConfig';
+import { Auth } from '@supabase/ui';
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <UserProvider supabaseClient={supabaseClient}>
+    <Auth.UserContextProvider supabaseClient={supabase}>
       <Component {...pageProps} />
-    </UserProvider>
+    </Auth.UserContextProvider>
   );
 }
 export default MyApp;

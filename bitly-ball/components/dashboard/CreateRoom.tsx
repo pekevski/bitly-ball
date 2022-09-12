@@ -1,5 +1,4 @@
-import { useUser } from '@supabase/supabase-auth-helpers/react';
-import { Router, useRouter } from 'next/router';
+import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { savePlayerLocalStorage } from '../../lib/LocalStorage';
 import { createRoom } from '../../lib/Repository';
@@ -7,10 +6,11 @@ import { createPlayer } from '../../lib/Business';
 import Button from '../Button';
 import NumberCounter from '../NumberCounter';
 import clsx from 'clsx';
+import { Auth } from '@supabase/ui';
 
 export default function CreateRoom() {
   const router = useRouter();
-  const { user } = useUser();
+  const { user } = Auth.useUser();
 
   const [playerName, setPlayerName] = useState<string>('');
   const [rounds, setRounds] = useState<number>(3);

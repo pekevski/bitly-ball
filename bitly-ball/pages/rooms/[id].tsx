@@ -9,6 +9,7 @@ import { getPlayerLocalStorage } from '../../lib/LocalStorage';
 import { Player } from '../../types/Player';
 import { Game } from '../../components/Game';
 import { Round } from '../../types/Round';
+import { supabase } from '../../lib/SupabaseConfig';
 
 type RoomPageProps = {};
 
@@ -56,7 +57,7 @@ const RoomPage: React.FC<RoomPageProps> = () => {
   }, [rounds]);
 
   return (
-    <Page>
+    <Page signOut={supabase.auth.signOut}>
       <main className="h-full w-full">
         <div className="flex lg:flex-row flex-col h-full">
           <Container>

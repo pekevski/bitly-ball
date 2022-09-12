@@ -1,7 +1,7 @@
 import { Player } from '../types/Player';
 import { Room, RoomStatusEnum } from '../types/Room';
 import { Round } from '../types/Round';
-import { supabase } from './SupbaseConfig';
+import { supabase } from './SupabaseConfig';
 
 // Api for calls made to the supabase db
 

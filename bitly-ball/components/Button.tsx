@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import clsx from 'clsx';
 
-type ButtonProps = {
+type ButtonProps = PropsWithChildren<{
   disabled: boolean;
   handleClick: Function;
   width?: 'full' | 'content';
-};
+}>;
 
 const Button: React.FC<ButtonProps> = ({
   handleClick,
