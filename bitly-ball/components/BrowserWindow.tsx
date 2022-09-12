@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 
-type BrowserWindowProps = {};
+type BrowserWindowProps = PropsWithChildren<{}>;
 
 const BrowserWindow: React.FC<BrowserWindowProps> = (props) => {
   return (
