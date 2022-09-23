@@ -2,10 +2,10 @@ import Button from '../Button';
 import { useRouter } from 'next/router';
 import Link from '../Link';
 import { Auth } from '@supabase/ui';
-import { ApiError } from '@supabase/supabase-js';
+import { AuthError } from '@supabase/supabase-js';
 
 type NavBarProps = {
-  signOut: () => Promise<{ error: ApiError | null }>
+  signOut: () => Promise<{ error: AuthError | null }>
 };
 
 export const NavBar: React.FC<NavBarProps> = (props) => {

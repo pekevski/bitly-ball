@@ -1,10 +1,10 @@
 import React, { PropsWithChildren } from 'react';
 import { NavBar } from './NavBar';
 import Head from 'next/head';
-import { ApiError } from '@supabase/supabase-js';
+import { AuthError } from '@supabase/supabase-js';
 
 type PageProps = PropsWithChildren<{
-  signOut: () => Promise<{ error: ApiError | null }>
+  signOut: () => Promise<{ error: AuthError | null }>
   title?: string;
 }>;
 
