@@ -12,7 +12,7 @@ import { ScreenshotResponse } from '../types/ScreenshotResponse';
 type GameProps = {
   currentPlayer: Player;
   room: Room;
-  players: Player[];
+  players: Map<string, Player>;
   rounds: Round[];
   currentRound?: Round;
   playerTurnId?: string;
@@ -30,7 +30,7 @@ export const Game: React.FC<GameProps> = ({
 }) => {
   const [url, setUrl] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
-  const [response, setResponse] = useState<ScreenshotResponse | undefined>(
+  const [imageResponse, setImageResponse] = useState<ScreenshotResponse | undefined>(
     undefined
   );
 
@@ -39,7 +39,7 @@ export const Game: React.FC<GameProps> = ({
     // We got a image response lets update the current round
     // with the resulting data of the response.
     // Calculate points, calculate round.
-    if (response && currentRound) {
+    if (imageResponse && currentRound) {
       const _createRound = async (
         response: ScreenshotResponse
       ): Promise<void> => {
@@ -52,6 +52,7 @@ export const Game: React.FC<GameProps> = ({
             url,
             response
           );
+
         } catch (e) {
           // TODO Handle error when we cant update the round, maybe we put the
           // phrase back and ask them to try again?
@@ -60,7 +61,7 @@ export const Game: React.FC<GameProps> = ({
       };
 
       console.log('BITLY BALL => response changed AND caused a create round');
-      _createRound(response);
+      _createRound(imageResponse);
     } else {
 
       // Response is undefined, if we have a current round lets
@@ -69,12 +70,12 @@ export const Game: React.FC<GameProps> = ({
       // Do we need to do anything, replication should know this since rounds
       // have changed....
     }
-  }, [response]);
+  }, [imageResponse]);
 
   const handleNextRound = () => {
     console.log('BITLY => Handle Try Again');
     setUrl('');
-    setResponse(undefined);
+    setImageResponse(undefined);
   };
 
   const handleStartGame = () => {
@@ -85,7 +86,7 @@ export const Game: React.FC<GameProps> = ({
   const gameInProgress = room?.status === RoomStatusEnum.INPROGRESS;
   const gameReadyToStart = room?.status === RoomStatusEnum.CREATED;
   const currentPlayerTurn = currentPlayer?.id === playerTurnId;
-  const canStart = players.length > 1;
+  const canStart = players.size > 1;
 
   if (gameInProgress) {
     return (
@@ -96,27 +97,33 @@ export const Game: React.FC<GameProps> = ({
               url={url}
               width={1000}
               height={600}
-              handleSuccess={setResponse}
+              handleSuccess={setImageResponse}
               handleLoading={setLoading}
             />
           </div>
         )}
 
-        {!response && currentPlayerTurn && (
+        { !currentPlayerTurn && (
+          <div>
+            Hurry up {players.get(currentRound?.playerId || "none")?.name}! Waiting for you to take your turn
+          </div>
+        )}
+
+        {!imageResponse && currentPlayerTurn && (
           <div className="p-5 align-bottom">
             <TextInput handleSubmit={setUrl} loading={loading} />
           </div>
         )}
 
-        {!!response && (
+        {!!imageResponse && (
           <div className="align-bottom bg-gray-100 p-5">
             <div className="flex sm:flex-row justify-between pb-5">
               <h4>
-                {response.success ? '200 OK Success!' : '404 Fail!'}{' '}
-                {response.success ? '+' : '-'}
+                {imageResponse.success ? '200 OK Success!' : '404 Fail!'}{' '}
+                {imageResponse.success ? '+' : '-'}
                 {url.length} points
               </h4>
-              <h4>{response.url}</h4>
+              <h4>{imageResponse.url}</h4>
             </div>
             <Button
               width={'full'}

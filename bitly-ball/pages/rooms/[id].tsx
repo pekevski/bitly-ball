@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import Players from '../../components/Players';
 import { useStore } from '../../lib/Store';
 import Rounds from '../../components/Rounds';
 import { Page } from '../../components/Layout/Page';
@@ -32,7 +31,7 @@ const RoomPage: React.FC<RoomPageProps> = () => {
   );
 
   const [roundIndex, setRoundIndex] = useState<number | undefined>(undefined);
-
+  
   useEffect(() => {
     // Get the current player from local storage if we revisit this
     // page. Everytime we join a game as a user we store their info
@@ -53,6 +52,7 @@ const RoomPage: React.FC<RoomPageProps> = () => {
     setPlayerTurnId(currentRound?.playerId);
     setRoundIndex(currentRound?.roundIndex);
     setCurrentRound(currentRound);
+    console.log("results ->", {currentRound, playerTurnId, roundIndex} )
   }, [rounds]);
 
   return (
@@ -60,28 +60,6 @@ const RoomPage: React.FC<RoomPageProps> = () => {
       <main className="h-full w-full">
         <div className="flex lg:flex-row flex-col h-full">
           <Container>
-            <div className="flex flex-col">
-              <div className="flex justify-between">
-                {!!room && (
-                  <div className="border-bottom-5">
-                    <h2>Status: {room.status}</h2>
-                    <h2>Rounds: {room.rounds}</h2>
-                    {currentRound && (
-                      <h2>Curent Round: {currentRound.roundIndex + 1}</h2>
-                    )}
-
-                    {/* Show the players of the game and ordering */}
-                    {currentPlayer && playerTurnId && (
-                      <Players
-                        players={players}
-                        currentPlayerId={currentPlayer.id}
-                        playerTurnId={playerTurnId}
-                      />
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
 
             {room && currentPlayer && (
               <Game
@@ -100,8 +78,9 @@ const RoomPage: React.FC<RoomPageProps> = () => {
             <div className="p-5 h-full overflow-y-auto bg-gray-200">
               <Rounds
                 rounds={rounds}
+                players={players}
                 currentRound={currentRound}
-                roundIndex={roundIndex}
+                playerTurnId={playerTurnId}
               />
             </div>
           </div>

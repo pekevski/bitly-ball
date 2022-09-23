@@ -1,5 +1,5 @@
 import { Player } from '../types/Player';
-import { Room, RoomStatusEnum } from '../types/Room';
+import { Room } from '../types/Room';
 import { Round } from '../types/Round';
 import { supabase } from './SupbaseConfig';
 

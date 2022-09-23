@@ -10,9 +10,16 @@ import * as database from './Repository';
 export const startRoom = async (
   roomId: string,
   rounds: number,
-  players: Array<Player>
+  players: Map<string, Player>
 ): Promise<Array<Round> | null> => {
   try {
+
+    const existingRoom = await database.fetchRoom(roomId, undefined);
+
+    if (existingRoom && existingRoom.status !== RoomStatusEnum.CREATED) {
+      throw new Error("Room is already in progress")
+    }
+
     // Put the room in an inprogress status
     await database.updateRoom({
       id: roomId,
@@ -53,7 +60,7 @@ export const startRoom = async (
 
 export const submitRound = async (
   roundId: string,
-  url: string,
+  phrase: string,
   response: ScreenshotResponse
 ): Promise<Round> => {
 
@@ -61,8 +68,8 @@ export const submitRound = async (
 
     const newRound: Partial<Round> = {
       id: roundId,
-      points: response.success ? url.length : -url.length,
-      phrase: url,
+      points: response.success ? phrase.length : -phrase.length,
+      phrase: phrase,
       image: `data:image/jpeg;charset=utl-8;base64,${response.image}`,
       result: response.success,
       submitted: true

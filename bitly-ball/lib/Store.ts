@@ -11,7 +11,7 @@ type StoreProps = {
 
 export const useStore = (props: StoreProps) => {
   const [room, setRoom] = useState<Room | undefined>(undefined);
-  const [players, setPlayers] = useState<Player[]>([]);
+  const [players, setPlayers] = useState<Map<string, Player>>(new Map());
   const [rounds, setRounds] = useState<Round[]>([]);
 
   const [newRoom, handleNewRoom] = useState<Room | undefined>(undefined);
@@ -64,7 +64,7 @@ export const useStore = (props: StoreProps) => {
       .from<Round>('round') // TODO: improve listener `round:roomId=eq.${props.roomId}`)
       // .on('INSERT', (payload) => handleNewRound(payload.new))
       .on('UPDATE', (payload) => handleUpdatedRound(payload.new))
-      .on('DELETE', (payload) => handleDeletedRound(payload.old))
+      // .on('DELETE', (payload) => handleDeletedRound(payload.old))
       .subscribe();
 
     // Cleanup on unmount
@@ -80,7 +80,15 @@ export const useStore = (props: StoreProps) => {
   useEffect(() => {
     if (props?.roomId) {
       fetchRoom(props.roomId, setRoom);
-      fetchPlayers(props.roomId, setPlayers);
+      fetchPlayers(props.roomId, (input: Player[]) => {
+        const result = new Map();
+
+        input.forEach((p) => {
+          result.set(p.id, p);
+        })
+
+        setPlayers(result)
+      });
       fetchRounds(props.roomId, setRounds);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -89,9 +97,7 @@ export const useStore = (props: StoreProps) => {
   // New player received from Postgres
   useEffect(() => {
     if (newPlayer && newPlayer.roomId === props.roomId) {
-      if (!players.find((p) => p.id === newPlayer.id)) {
-        setPlayers(players.concat(newPlayer));
-      }
+      setPlayers(players.set(newPlayer.id, newPlayer));
       console.log('new player triggered', newPlayer, players);
     }
   }, [newPlayer]);
@@ -125,7 +131,7 @@ export const useStore = (props: StoreProps) => {
       // find the round in our list of rounds and update it
       const roundsCopy = [...rounds];
       let roundCopyIndex = roundsCopy.findIndex(
-        (r) => (r.id = updatedRound.id)
+        (r) => (r.id === updatedRound.id)
       );
 
       if (roundCopyIndex > -1) {
