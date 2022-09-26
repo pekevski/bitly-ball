@@ -8,6 +8,8 @@ import { getPlayerLocalStorage } from '../../lib/LocalStorage';
 import { Player } from '../../types/Player';
 import { Game } from '../../components/Game';
 import { Round } from '../../types/Round';
+import { endRoom } from '../../lib/Business';
+import { Room } from '../../types/Room';
 
 type RoomPageProps = {};
 
@@ -29,8 +31,6 @@ const RoomPage: React.FC<RoomPageProps> = () => {
   const [playerTurnId, setPlayerTurnId] = useState<string | undefined>(
     undefined
   );
-
-  const [roundIndex, setRoundIndex] = useState<number | undefined>(undefined);
   
   useEffect(() => {
     // Get the current player from local storage if we revisit this
@@ -49,10 +49,30 @@ const RoomPage: React.FC<RoomPageProps> = () => {
 
     // Get the current round and players turn from the list of rounds
     const currentRound = rounds.find((r) => r.submitted === false);
-    setPlayerTurnId(currentRound?.playerId);
-    setRoundIndex(currentRound?.roundIndex);
-    setCurrentRound(currentRound);
-    console.log("results ->", {currentRound, playerTurnId, roundIndex} )
+
+    if (currentRound) {
+      setPlayerTurnId(currentRound.playerId);
+      setCurrentRound(currentRound);
+      console.log("results ->", {currentRound, playerTurnId} )
+    } else if (rounds.length) {
+      // All rounds are submitted, the game is over.
+      const _endGame = async (
+        room: Room
+      ): Promise<void> => {
+        try {
+          await endRoom(room);
+        } catch (e) {
+          // TODO Handle error when we cant update the room, maybe we put the
+          // phrase back and ask them to try again?
+          console.log('Error ending room', e);
+        }
+      };
+
+      if (room) {
+        _endGame(room);
+      }
+    }
+
   }, [rounds]);
 
   return (
@@ -65,11 +85,9 @@ const RoomPage: React.FC<RoomPageProps> = () => {
               <Game
                 room={room}
                 players={players}
-                rounds={rounds}
                 currentRound={currentRound}
                 currentPlayer={currentPlayer}
                 playerTurnId={playerTurnId}
-                roundIndex={roundIndex}
               />
             )}
           </Container>

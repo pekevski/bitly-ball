@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import useSWR from 'swr';
 import { Player } from '../types/Player';
 import { Round } from '../types/Round';
 import Loader from './Loader';
@@ -16,49 +17,76 @@ const Rounds: React.FC<RoundsProps> = ({
   currentRound,
   playerTurnId
 }) => {
+  const [loading, setLoading] = useState<boolean>(true);
   const [data, setData] = useState(new Map<number, Round[]>());
+  const [totals, setTotals] = useState(new Map<string, number>());
 
-  useEffect(() => {
+  useMemo(() => {
     if (rounds) {
-      const d = constructTable(rounds, players);
-      setData(d);
+      const result = constructTable(rounds, players);
+      setData(result.result);
+      setTotals(result.totals);
+      setLoading(false);
     }
   }, [rounds]);
 
-  if (!rounds) {
+  if (loading) {
     return <Loader />;
-  } else {
-    return (
-      <>
-
-        <table className={"table-auto w-full text-left"}>
-          {Array.from(data.entries()).map((playerData, index) => (
-            <tbody key={playerData[0]}>
-              <tr>
-                <th colSpan={4}>Round {index + 1}</th>
-              </tr>
-              {playerData[1]
-                // .filter((r) => r.result)
-                .map((round, index) => (
-                  <tr key={round.id}>
-                    <td>{currentRound?.id === round.id ? "✨" : ""} {players.get(round.playerId)?.isHost ? '👑' : '👤'} {players.get(round.playerId)?.name}</td>
-                    <td>{round.phrase}</td>
-                    <td>{round.points.toString()}</td>
-                  </tr>
-                )
-              )}
-            </tbody>
-          ))}
-        </table>
-      </>
-    );
   }
+  
+  return (
+    <>
+
+      <table className={"table-auto w-full text-left"}>
+          <tbody key={"total"}>
+            <tr>
+              <th colSpan={4}>Totals</th>
+            </tr>
+            {Array.from(totals.entries()).map((totalData) => (
+                <tr key={"total"+ totalData[0]}>
+                  <td colSpan={3}>
+                    {players.get(totalData[0])?.isHost ? '👑' : '👤'} {players.get(totalData[0])?.name}
+                  </td>
+                  <td className='text-right'>{totalData[1].toString()}</td>
+                </tr>
+            ))}
+          </tbody>
+        {Array.from(data.entries()).map((playerData, index) => (
+          <tbody key={playerData[0]}>
+            <tr>
+              <th colSpan={4}>Round {index + 1}</th>
+            </tr>
+            {playerData[1]
+              .map((round) => (
+                <tr key={round.id}>
+                  <td>{currentRound?.id === round.id ? "✨" : ""} {players.get(round.playerId)?.isHost ? '👑' : '👤'} {players.get(round.playerId)?.name}</td>
+                  <td>{round.phrase}</td>
+                  <td className='text-center'>
+                    {round.image && <img src={round.image} width={200} height={100} /> }
+                  </td>
+                  <td className='text-right'>{round.points.toString()}</td>
+                </tr>
+              )
+            )}
+          </tbody>
+        ))}
+
+
+      </table>
+    </>
+  );
+  
 };
 
+interface DataResult {
+  result: Map<number, Round[]>;
+  totals: Map<string, number>;
+}
 
-const constructTable = (rounds: Round[], players: Map<string, Player>) => {
+const constructTable = (rounds: Round[], players: Map<string, Player>): DataResult => {
 
   const result = new Map<number, Round[]>()
+  const totals = new Map<string, number>();
 
   rounds
     .sort((a,b) => {
@@ -80,11 +108,18 @@ const constructTable = (rounds: Round[], players: Map<string, Player>) => {
       if (!result.has(r.roundIndex)) {
         result.set(r.roundIndex, [])
       }
-
+      
       result.get(r.roundIndex)?.push(r);
+
+      if (!totals.has(r.playerId)) {
+        totals.set(r.playerId, 0);
+      }
+
+      const oldPoints = totals.get(r.playerId) || 0
+      totals.set(r.playerId, r.points + oldPoints);
     })
 
-  return result;
+  return { result, totals };
 }
 
 export default Rounds;

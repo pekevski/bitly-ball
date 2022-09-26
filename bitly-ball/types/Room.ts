@@ -7,5 +7,6 @@ export type Room = {
 
 export enum RoomStatusEnum {
   CREATED = 'created',
-  INPROGRESS = 'inprogress'
+  INPROGRESS = 'inprogress',
+  COMPLETED = 'completed'
 }

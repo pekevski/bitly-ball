@@ -1,7 +1,7 @@
 // Handles all business logic
 // Only interfaces with Repository.ts
 import { Player } from '../types/Player';
-import { RoomStatusEnum } from '../types/Room';
+import { Room, RoomStatusEnum } from '../types/Room';
 import { Round } from '../types/Round';
 import { ScreenshotResponse } from '../types/ScreenshotResponse';
 import * as database from './Repository';
@@ -26,14 +26,6 @@ export const startRoom = async (
       status: RoomStatusEnum.INPROGRESS
     });
 
-    // Pick a player in the room
-    // Initially lets pick the first player created in the room (the host)
-    // TODO: maybe enhance this to be a random player. We will need to preserve
-    // ordering of the rooms' players somehow between sessions / refreshes of
-    // the page
-    // Randomly select a player
-    // const startingPlayer = players[Math.floor(Math.random() * players.length)];
-
     // Create all the rounds for the game based on the rounds and players
     const roundsToCreate: Array<Partial<Round>> = new Array();
 
@@ -52,6 +44,34 @@ export const startRoom = async (
     }
 
     return await database.createManyRounds(roundsToCreate);
+  } catch (e) {
+    console.error(e);
+    throw e;
+  }
+};
+
+export const endRoom = async (
+  oldRoom: Room,
+): Promise<Room | null> => {
+  try {
+
+    if (oldRoom.status === RoomStatusEnum.COMPLETED) {
+      return oldRoom;
+    }
+
+    const existingRoom = await database.fetchRoom(oldRoom.id, undefined);
+
+    if (existingRoom && existingRoom.status !== RoomStatusEnum.INPROGRESS) {
+      throw new Error("Room has not started")
+    }
+
+    // Put the room in a completed status
+    const newRoom = await database.updateRoom({
+      id: oldRoom.id,
+      status: RoomStatusEnum.COMPLETED
+    });
+
+    return newRoom;
   } catch (e) {
     console.error(e);
     throw e;
