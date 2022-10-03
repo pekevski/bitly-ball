@@ -8,13 +8,12 @@ import * as database from './Repository';
 
 // Starts a room for all players when the host is ready to begin
 export const startRoom = async (
-  roomId: string,
-  rounds: number,
+  room: Room,
   players: Map<string, Player>
 ): Promise<Array<Round> | null> => {
   try {
 
-    const existingRoom = await database.fetchRoom(roomId, undefined);
+    const existingRoom = await database.fetchRoom(room.id, undefined);
 
     if (existingRoom && existingRoom.status !== RoomStatusEnum.CREATED) {
       throw new Error("Room is already in progress")
@@ -22,19 +21,19 @@ export const startRoom = async (
 
     // Put the room in an inprogress status
     await database.updateRoom({
-      id: roomId,
+      id: room.id,
       status: RoomStatusEnum.INPROGRESS
     });
 
     // Create all the rounds for the game based on the rounds and players
     const roundsToCreate: Array<Partial<Round>> = new Array();
 
-    for (let roundIndex = 0; roundIndex < rounds; roundIndex++) {
+    for (let i = 0; i < room.rounds; i++) {
       players.forEach((player) => {
         const roundToCreate: Partial<Round> = {
-          roundIndex: roundIndex,
+          roundIndex: i,
           playerId: player.id,
-          roomId: roomId,
+          roomId: room.id,
           // provide date to enforce round ordering by createdDate
           createdDate: new Date()
         };

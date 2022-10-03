@@ -8,14 +8,12 @@ type RoundsProps = {
   rounds: Array<Round>;
   players: Map<string, Player>;
   currentRound?: Round;
-  playerTurnId?: string;
 };
 
 const Rounds: React.FC<RoundsProps> = ({
   rounds,
   players,
   currentRound,
-  playerTurnId
 }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [data, setData] = useState(new Map<number, Round[]>());

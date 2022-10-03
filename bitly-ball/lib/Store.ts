@@ -62,7 +62,7 @@ export const useStore = (props: StoreProps) => {
     // Listen for new and deleted rounds
     const roundListener = supabase
       .from<Round>('round') // TODO: improve listener `round:roomId=eq.${props.roomId}`)
-      // .on('INSERT', (payload) => handleNewRound(payload.new))
+      .on('INSERT', (payload) => handleNewRound(payload.new))
       .on('UPDATE', (payload) => handleUpdatedRound(payload.new))
       // .on('DELETE', (payload) => handleDeletedRound(payload.old))
       .subscribe();
@@ -97,7 +97,7 @@ export const useStore = (props: StoreProps) => {
   // New player received from Postgres
   useEffect(() => {
     if (newPlayer && newPlayer.roomId === props.roomId) {
-      setPlayers(players.set(newPlayer.id, newPlayer));
+      setPlayers(new Map(players.set(newPlayer.id, newPlayer)));
       console.log('new player triggered', newPlayer, players);
     }
   }, [newPlayer]);

@@ -27,10 +27,6 @@ const RoomPage: React.FC<RoomPageProps> = () => {
   const [currentRound, setCurrentRound] = useState<Round | undefined>(
     undefined
   );
-
-  const [playerTurnId, setPlayerTurnId] = useState<string | undefined>(
-    undefined
-  );
   
   useEffect(() => {
     // Get the current player from local storage if we revisit this
@@ -51,9 +47,8 @@ const RoomPage: React.FC<RoomPageProps> = () => {
     const currentRound = rounds.find((r) => r.submitted === false);
 
     if (currentRound) {
-      setPlayerTurnId(currentRound.playerId);
       setCurrentRound(currentRound);
-      console.log("results ->", {currentRound, playerTurnId} )
+      console.log("results ->", {currentRound} )
     } else if (rounds.length) {
       // All rounds are submitted, the game is over.
       const _endGame = async (
@@ -87,7 +82,6 @@ const RoomPage: React.FC<RoomPageProps> = () => {
                 players={players}
                 currentRound={currentRound}
                 currentPlayer={currentPlayer}
-                playerTurnId={playerTurnId}
               />
             )}
           </Container>
@@ -98,7 +92,6 @@ const RoomPage: React.FC<RoomPageProps> = () => {
                 rounds={rounds}
                 players={players}
                 currentRound={currentRound}
-                playerTurnId={playerTurnId}
               />
             </div>
           </div>
