@@ -15,12 +15,10 @@ type GameProps = {
   room: Room;
   players: Map<string, Player>;
   currentRound?: Round;
-  playerTurnId?: string;
 };
 
 export const Game: React.FC<GameProps> = ({
   currentPlayer,
-  playerTurnId,
   room,
   players,
   currentRound,
@@ -67,14 +65,13 @@ export const Game: React.FC<GameProps> = ({
   }, [imageResponse]);
 
   const handleStartGame = () => {
-    startRoom(room.id, room.rounds, players);
+    startRoom(room, players);
   };
 
-  const gameInProgress = room?.status === RoomStatusEnum.INPROGRESS;
-  const gameReadyToStart = room?.status === RoomStatusEnum.CREATED;
-  const gameHasEnded = room?.status === RoomStatusEnum.COMPLETED;
-
-  const currentPlayerTurn = currentPlayer?.id === playerTurnId;
+  const gameInProgress = room.status === RoomStatusEnum.INPROGRESS;
+  const gameReadyToStart = room.status === RoomStatusEnum.CREATED;
+  const gameHasEnded = room.status === RoomStatusEnum.COMPLETED;
+  const currentPlayerTurn = currentPlayer?.id === currentRound?.playerId;
   const canStart = players.size > 1;
 
   if (gameReadyToStart) {
