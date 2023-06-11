@@ -7,7 +7,7 @@ import { Footer } from '../components/Layout/Footer';
 import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
-import { Database } from '../lib/database.types';
+import { Database } from '../types/database';
 
 export default function LoginPage() {
   const supabaseClient = useSupabaseClient<Database>();
@@ -31,7 +31,7 @@ export default function LoginPage() {
             appearance={{ theme: ThemeSupa }}
             supabaseClient={supabaseClient}
             // providers={['google', 'github']}
-            socialLayout="horizontal"
+            // socialLayout="horizontal"
             magicLink={true}
           />
         </div>

@@ -9,6 +9,7 @@ import { Room, RoomStatusEnum } from '../../types/Room';
 import { useRouter } from 'next/router';
 import Button from '../Button';
 import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react';
+import { Player } from '../../types/Player';
 
 export default function JoinRoom() {
   const router = useRouter();
@@ -64,7 +65,10 @@ export default function JoinRoom() {
       }
 
       if (player) {
-        await savePlayerLocalStorage(player);
+
+        console.log("player is...", player)
+
+        savePlayerLocalStorage(player as Player);
       }
 
       router.push(`/rooms/${roomId}`);

@@ -1,11 +1,9 @@
 import {
   SupabaseClient,
-  useSupabaseClient
 } from '@supabase/auth-helpers-react';
 import { Player } from '../types/Player';
 import { Room } from '../types/Room';
 import { Round } from '../types/Round';
-import { Database } from './database.types';
 
 // Api for calls made to the supabase db
 
@@ -23,10 +21,10 @@ export const fetchPlayers = async (
     console.log('Fetching players....');
 
     let { data } = await supabaseClient
-      .from<Player>('player')
+      .from('player')
       .select()
       .eq('roomId', roomId)
-      .order('name', { ascending: true });
+      .order('name', { ascending: true })
 
     if (setState) setState(data);
     return data;
@@ -50,7 +48,7 @@ export const fetchRounds = async (
     console.log('Fetching rounds....');
 
     let { data } = await supabaseClient
-      .from<Round>('round')
+      .from('round')
       .select()
       .eq('roomId', roomId)
       .order('roundIndex', { ascending: true });
@@ -76,7 +74,7 @@ export const fetchRoom = async (
   try {
     console.log('Fetching room....');
     let { data } = await supabaseClient
-      .from<Room>('room')
+      .from('room')
       .select()
       .eq('id', roomId)
       .maybeSingle();
@@ -101,7 +99,7 @@ export const fetchPlayerByUserIdAndRoomId = async (
     console.log('Fetching player in room....');
 
     let { data } = await supabaseClient
-      .from<Player>('player')
+      .from('player')
       .select()
       .eq('roomId', roomId)
       .eq('userId', userId)
@@ -124,7 +122,7 @@ export const createRoom = async (
 ) => {
   try {
     let { data, error } = await supabaseClient
-      .from<Room>('room')
+      .from('room')
       .insert({ rounds })
       .select()
       .maybeSingle();
@@ -147,7 +145,7 @@ export const createPlayer = async (
 ) => {
   try {
     let { data } = await supabaseClient
-      .from<Player>('player')
+      .from('player')
       .insert(player)
       .select()
       .maybeSingle();
@@ -168,7 +166,7 @@ export const createRound = async (
 ) => {
   try {
     let { data } = await supabaseClient
-      .from<Round>('round')
+      .from('round')
       .insert(round)
       .select()
       .maybeSingle();
@@ -188,7 +186,7 @@ export const createManyRounds = async (
   rounds: Array<Partial<Round>>
 ) => {
   try {
-    let { data } = await supabaseClient.from<Round>('round').insert(rounds);
+    let { data } = await supabaseClient.from('round').insert(rounds);
     return data;
   } catch (error) {
     console.log('error', error);
@@ -202,7 +200,7 @@ export const updateRound = async (
 ) => {
   try {
     let { data } = await supabaseClient
-      .from<Round>('round')
+      .from('round')
       .update(round)
       .match({ id: round.id })
       .select()
@@ -221,30 +219,15 @@ export const updateRoom = async (
 ) => {
   try {
     let { data } = await supabaseClient
-      .from<Room>('room')
+      .from('room')
       .update(room)
       .match({ id: room.id })
       .select()
       .maybeSingle();
 
-    return data;
+    return data as Room;
   } catch (error) {
     console.log('error', error);
     throw error;
   }
 };
-
-/**
- * Delete a channel from the DB
- * @param {number} channel_id
- */
-// export const deleteRoom = async (supabaseClient: SupabaseClient, roomId: string) => {
-//   try {
-//     let { data: playerBody } = await supabaseClient.from<Player>('player').delete().match({ roomId: roomId })
-//     let { data: gameBody } = await supabaseClient.from<Round>('game').delete().match({ playerId: [playerBody?.map(p => p.id)] })
-//     let { data: roomBody } = await supabaseClient.from<Room>('room').delete().match({ id: roomId })
-//     return roomBody
-//   } catch (error) {
-//     console.log('error', error)
-//   }
-// }

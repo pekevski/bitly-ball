@@ -4,7 +4,7 @@ import { Round } from '../types/Round';
 import { Room } from '../types/Room';
 import { fetchPlayers, fetchRoom, fetchRounds } from './Repository';
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
-import { Database } from './database.types';
+import { Database } from '../types/database';
 
 type StoreProps = {
   roomId: string | undefined;
@@ -55,7 +55,7 @@ export const useStore = (props: StoreProps) => {
           schema: 'public',
           table: 'room'
         },
-        (payload) => handleNewRoom(payload.new)
+        (payload) => handleNewRoom(payload.new as Room)
       )
       .on(
         'postgres_changes',
@@ -64,7 +64,7 @@ export const useStore = (props: StoreProps) => {
           schema: 'public',
           table: 'room'
         },
-        (payload) => handleUpdatedRoom(payload.new)
+        (payload) => handleUpdatedRoom(payload.new as Room)
       )
       .subscribe();
 
@@ -79,7 +79,7 @@ export const useStore = (props: StoreProps) => {
           schema: 'public',
           table: 'player'
         },
-        (payload) => handleNewPlayer(payload.new)
+        (payload) => handleNewPlayer(payload.new as Player)
       )
       .subscribe();
 
@@ -94,7 +94,7 @@ export const useStore = (props: StoreProps) => {
           schema: 'public',
           table: 'round'
         },
-        (payload) => handleNewRound(payload.new)
+        (payload) => handleNewRound(payload.new as Round)
       )
       .on(
         'postgres_changes',
@@ -103,7 +103,7 @@ export const useStore = (props: StoreProps) => {
           schema: 'public',
           table: 'round'
         },
-        (payload) => handleUpdatedRound(payload.new)
+        (payload) => handleUpdatedRound(payload.new as Round)
       )
       .subscribe();
 

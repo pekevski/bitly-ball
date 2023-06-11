@@ -108,7 +108,7 @@ export const submitRound = async (
       throw new Error(`Updating round ${newRound.id} failed`);
     }
 
-    return result;
+    return result as Round;
   } catch (e) {
     console.error(e);
     throw e;
@@ -147,7 +147,7 @@ export const createPlayer = async (
 
     let createdPlayer = await database.createPlayer(supabaseClient, player);
 
-    return createdPlayer;
+    return createdPlayer as Player | null;
   } catch (error) {
     console.log('error', error);
     throw error;

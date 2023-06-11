@@ -12,7 +12,7 @@ The following actions need to be done before releasing the game!
 ## Application
 - [ ] $$$$ fix routing permissions when un authenticated
 - [ ] reassess state management?
-- [ ] $ Type the supabase client object
+- [ ] $ Type the supabase client object, including all database queries
 - [ ] $ work out a better way to pass the supabase client object around?
 
 ## UI

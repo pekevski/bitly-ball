@@ -10,11 +10,13 @@ import { Game } from '../../components/Game';
 import { Round } from '../../types/Round';
 import { endRoom } from '../../lib/Business';
 import { Room } from '../../types/Room';
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
 
 type RoomPageProps = {};
 
 const RoomPage: React.FC<RoomPageProps> = () => {
   const router = useRouter();
+  const supabaseClient = useSupabaseClient();
   const query = router.query;
   const roomId = query.id as string;
 
@@ -56,7 +58,7 @@ const RoomPage: React.FC<RoomPageProps> = () => {
       // All rounds are submitted, the game is over.
       const _endGame = async (room: Room): Promise<void> => {
         try {
-          await endRoom(room);
+          await endRoom(supabaseClient, room);
         } catch (e) {
           // TODO Handle error when we cant update the room, maybe we put the
           // phrase back and ask them to try again?
