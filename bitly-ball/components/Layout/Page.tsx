@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import { NavBar } from './NavBar';
 import Head from 'next/head';
 
@@ -6,7 +6,10 @@ type PageProps = {
   title?: string;
 };
 
-export const Page: React.FC<PageProps> = ({ title, children }) => {
+export const Page: React.FC<PropsWithChildren<PageProps>> = ({
+  title,
+  children
+}) => {
   return (
     <>
       {/* Head content TODO: improve me for metadata tags... */}

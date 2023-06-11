@@ -8,50 +8,40 @@ import { startRoom } from '../lib/Business';
 import React, { useEffect, useState } from 'react';
 import { Round } from '../types/Round';
 import { ScreenshotResponse } from '../types/ScreenshotResponse';
+import { ImageMetadataResults } from './ImageMetadataResults';
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
 
 type GameProps = {
   currentPlayer: Player;
   room: Room;
-  players: Player[];
-  rounds: Round[];
+  players: Map<string, Player>;
   currentRound?: Round;
-  playerTurnId?: string;
-  roundIndex?: number;
 };
 
 export const Game: React.FC<GameProps> = ({
   currentPlayer,
-  playerTurnId,
   room,
   players,
-  rounds,
-  currentRound,
-  roundIndex
+  currentRound
 }) => {
+  const supabaseClient = useSupabaseClient();
   const [url, setUrl] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
-  const [response, setResponse] = useState<ScreenshotResponse | undefined>(
-    undefined
-  );
+  const [imageResponse, setImageResponse] = useState<
+    ScreenshotResponse | undefined
+  >(undefined);
 
   useEffect(() => {
     console.log('BITLY BALL => response changed..');
     // We got a image response lets update the current round
     // with the resulting data of the response.
     // Calculate points, calculate round.
-    if (response && currentRound) {
-      const _createRound = async (
+    if (imageResponse && currentRound) {
+      const _submitRound = async (
         response: ScreenshotResponse
       ): Promise<void> => {
         try {
-
-          console.log('BITLY BALL => called promise for update round');
-
-          await submitRound(
-            currentRound.id,
-            url,
-            response
-          );
+          await submitRound(supabaseClient, currentRound.id, url, response);
         } catch (e) {
           // TODO Handle error when we cant update the round, maybe we put the
           // phrase back and ask them to try again?
@@ -60,76 +50,25 @@ export const Game: React.FC<GameProps> = ({
       };
 
       console.log('BITLY BALL => response changed AND caused a create round');
-      _createRound(response);
+      _submitRound(imageResponse);
     } else {
-
       // Response is undefined, if we have a current round lets
       // move on to the next round in the game.
       console.log('BITLY BALL => response is undefined');
       // Do we need to do anything, replication should know this since rounds
       // have changed....
     }
-  }, [response]);
-
-  const handleNextRound = () => {
-    console.log('BITLY => Handle Try Again');
-    setUrl('');
-    setResponse(undefined);
-  };
+  }, [imageResponse]);
 
   const handleStartGame = () => {
-    console.log('BITLY => Starting Room');
-    startRoom(room.id, room.rounds, players);
+    startRoom(supabaseClient, room, players);
   };
 
-  const gameInProgress = room?.status === RoomStatusEnum.INPROGRESS;
-  const gameReadyToStart = room?.status === RoomStatusEnum.CREATED;
-  const currentPlayerTurn = currentPlayer?.id === playerTurnId;
-  const canStart = players.length > 1;
-
-  if (gameInProgress) {
-    return (
-      <>
-        {url && url.length && (
-          <div className="p-5">
-            <BitlyImage
-              url={url}
-              width={1000}
-              height={600}
-              handleSuccess={setResponse}
-              handleLoading={setLoading}
-            />
-          </div>
-        )}
-
-        {!response && currentPlayerTurn && (
-          <div className="p-5 align-bottom">
-            <TextInput handleSubmit={setUrl} loading={loading} />
-          </div>
-        )}
-
-        {!!response && (
-          <div className="align-bottom bg-gray-100 p-5">
-            <div className="flex sm:flex-row justify-between pb-5">
-              <h4>
-                {response.success ? '200 OK Success!' : '404 Fail!'}{' '}
-                {response.success ? '+' : '-'}
-                {url.length} points
-              </h4>
-              <h4>{response.url}</h4>
-            </div>
-            <Button
-              width={'full'}
-              handleClick={handleNextRound}
-              disabled={false}
-            >
-              Next Round
-            </Button>
-          </div>
-        )}
-      </>
-    );
-  }
+  const gameInProgress = room.status === RoomStatusEnum.INPROGRESS;
+  const gameReadyToStart = room.status === RoomStatusEnum.CREATED;
+  const gameHasEnded = room.status === RoomStatusEnum.COMPLETED;
+  const currentPlayerTurn = currentPlayer?.id === currentRound?.playerId;
+  const canStart = players.size > 1;
 
   if (gameReadyToStart) {
     return (
@@ -155,5 +94,46 @@ export const Game: React.FC<GameProps> = ({
     );
   }
 
-  return <h1>Something is wrong with the game.</h1>;
+  if (gameInProgress) {
+    return (
+      <>
+        {!currentPlayerTurn && (
+          <div>
+            <h3>
+              Waiting for {players.get(currentRound?.playerId || 'none')?.name}{' '}
+              to take their turn.
+            </h3>
+          </div>
+        )}
+
+        {currentPlayerTurn && (
+          <div className="p-5 align-bottom">
+            <TextInput handleSubmit={setUrl} loading={loading} />
+          </div>
+        )}
+
+        {url && url.length && (
+          <div className="p-5">
+            <BitlyImage
+              url={url}
+              width={1000}
+              height={600}
+              handleSuccess={setImageResponse}
+              handleLoading={setLoading}
+            />
+          </div>
+        )}
+
+        {imageResponse && (
+          <ImageMetadataResults url={url} imageResponse={imageResponse} />
+        )}
+      </>
+    );
+  }
+
+  if (gameHasEnded) {
+    return <h1>GAME OVER</h1>;
+  }
+
+  return <h1>Something is wrong with the game. Please refresh.</h1>;
 };

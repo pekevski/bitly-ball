@@ -1,14 +1,17 @@
 import Head from 'next/head';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import DashboardHeader from '../components/dashboard/Header';
 import { Page } from '../components/Layout/Page';
-import { useUser, Auth } from '@supabase/supabase-auth-helpers/react';
-import { supabaseClient } from '@supabase/supabase-auth-helpers/nextjs';
 import { useRouter } from 'next/router';
 import { Footer } from '../components/Layout/Footer';
+import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react';
+import { Auth } from '@supabase/auth-ui-react';
+import { ThemeSupa } from '@supabase/auth-ui-shared';
+import { Database } from '../types/database';
 
 export default function LoginPage() {
-  const { user, isLoading, error } = useUser();
+  const supabaseClient = useSupabaseClient<Database>();
+  const user = useUser();
   const router = useRouter();
 
   useEffect(() => {
@@ -18,10 +21,6 @@ export default function LoginPage() {
     }
   }, [user, router]);
 
-  if (isLoading) {
-    return <h1>⚽ Loading...</h1>;
-  }
-
   return (
     <Page>
       <main className="h-full w-full">
@@ -29,13 +28,12 @@ export default function LoginPage() {
 
         <div className="p-5 my-10 bg-white border w-full md:w-6/12">
           <Auth
+            appearance={{ theme: ThemeSupa }}
             supabaseClient={supabaseClient}
-            // providers={['google']}
-            socialLayout="horizontal"
-            socialButtonSize="xlarge"
+            // providers={['google', 'github']}
+            // socialLayout="horizontal"
             magicLink={true}
           />
-          {error && <p>{error.message}</p>}
         </div>
       </main>
 

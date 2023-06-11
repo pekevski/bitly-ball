@@ -8,11 +8,13 @@ import {
 import { Room, RoomStatusEnum } from '../../types/Room';
 import { useRouter } from 'next/router';
 import Button from '../Button';
-import { UserProvider, useUser } from '@supabase/supabase-auth-helpers/react';
+import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react';
+import { Player } from '../../types/Player';
 
 export default function JoinRoom() {
   const router = useRouter();
-  const { user } = useUser();
+  const supabaseClient = useSupabaseClient();
+  const user = useUser();
 
   const [playerName, setPlayerName] = useState<string>('');
   const [roomId, setRoomId] = useState<string>('');
@@ -32,7 +34,7 @@ export default function JoinRoom() {
         throw new Error('Something went wrong. Please login to Bitly Ball');
       }
 
-      const roomToJoin = await fetchRoom(roomId, undefined);
+      const roomToJoin = await fetchRoom(supabaseClient, roomId, undefined);
 
       // Cant join room if it is not created or already inprogress
       if (!roomToJoin) {
@@ -47,10 +49,14 @@ export default function JoinRoom() {
 
       setError(undefined);
 
-      let player = await fetchPlayerByUserIdAndRoomId(user.id, roomToJoin.id);
+      let player = await fetchPlayerByUserIdAndRoomId(
+        supabaseClient,
+        user.id,
+        roomToJoin.id
+      );
 
       if (!player) {
-        player = await createPlayer({
+        player = await createPlayer(supabaseClient, {
           name: playerName,
           roomId: roomId,
           userId: user.id,
@@ -59,7 +65,10 @@ export default function JoinRoom() {
       }
 
       if (player) {
-        await savePlayerLocalStorage(player);
+
+        console.log("player is...", player)
+
+        savePlayerLocalStorage(player as Player);
       }
 
       router.push(`/rooms/${roomId}`);

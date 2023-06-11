@@ -1,4 +1,3 @@
-import { useUser } from '@supabase/supabase-auth-helpers/react';
 import { Router, useRouter } from 'next/router';
 import { useState } from 'react';
 import { savePlayerLocalStorage } from '../../lib/LocalStorage';
@@ -7,10 +6,12 @@ import { createPlayer } from '../../lib/Business';
 import Button from '../Button';
 import NumberCounter from '../NumberCounter';
 import clsx from 'clsx';
+import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react';
 
 export default function CreateRoom() {
   const router = useRouter();
-  const { user } = useUser();
+  const supabaseClient = useSupabaseClient();
+  const user = useUser();
 
   const [playerName, setPlayerName] = useState<string>('');
   const [rounds, setRounds] = useState<number>(3);
@@ -30,10 +31,12 @@ export default function CreateRoom() {
 
       setError(undefined);
 
-      const room = await createRoom(rounds);
+      const room = await createRoom(supabaseClient, rounds);
+
+      console.log('room??', room);
 
       if (room) {
-        const player = await createPlayer({
+        const player = await createPlayer(supabaseClient, {
           name: playerName,
           userId: user.id,
           roomId: room.id,
@@ -41,10 +44,13 @@ export default function CreateRoom() {
         });
 
         if (player) {
+          // save player to localstorage
           await savePlayerLocalStorage(player);
         }
-        // save player to localstorage
-        router.push(`/rooms/${room.id}`);
+
+        console.log('am i reaching the router??');
+
+        await router.push(`/rooms/${room.id}`);
       }
     } catch (e) {
       if (e instanceof Error) {
@@ -71,7 +77,18 @@ export default function CreateRoom() {
             value={playerName}
             onChange={(e) => setPlayerName(e.target.value)}
             className={clsx(
-              "px-4","py-2","transition","duration-300","border","border-gray-300","rounded","focus:border-transparent","focus:outline-none","focus:ring-4","focus:ring-blue-200")}
+              'px-4',
+              'py-2',
+              'transition',
+              'duration-300',
+              'border',
+              'border-gray-300',
+              'rounded',
+              'focus:border-transparent',
+              'focus:outline-none',
+              'focus:ring-4',
+              'focus:ring-blue-200'
+            )}
           />
         </div>
 

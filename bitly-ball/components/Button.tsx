@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import clsx from 'clsx';
 
 type ButtonProps = {
@@ -7,11 +7,11 @@ type ButtonProps = {
   width?: 'full' | 'content';
 };
 
-const Button: React.FC<ButtonProps> = ({
+const Button: React.FC<PropsWithChildren<ButtonProps>> = ({
   handleClick,
-  children,
   disabled,
-  width
+  width,
+  children
 }) => {
   const _handleClick = (e: React.FormEvent) => {
     e.preventDefault();

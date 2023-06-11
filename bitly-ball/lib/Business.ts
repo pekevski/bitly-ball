@@ -1,41 +1,44 @@
 // Handles all business logic
 // Only interfaces with Repository.ts
+import { SupabaseClient } from '@supabase/supabase-js';
 import { Player } from '../types/Player';
-import { RoomStatusEnum } from '../types/Room';
+import { Room, RoomStatusEnum } from '../types/Room';
 import { Round } from '../types/Round';
 import { ScreenshotResponse } from '../types/ScreenshotResponse';
 import * as database from './Repository';
 
 // Starts a room for all players when the host is ready to begin
 export const startRoom = async (
-  roomId: string,
-  rounds: number,
-  players: Array<Player>
+  supabaseClient: SupabaseClient,
+  room: Room,
+  players: Map<string, Player>
 ): Promise<Array<Round> | null> => {
   try {
+    const existingRoom = await database.fetchRoom(
+      supabaseClient,
+      room.id,
+      undefined
+    );
+
+    if (existingRoom && existingRoom.status !== RoomStatusEnum.CREATED) {
+      throw new Error('Room is already in progress');
+    }
+
     // Put the room in an inprogress status
-    await database.updateRoom({
-      id: roomId,
+    await database.updateRoom(supabaseClient, {
+      id: room.id,
       status: RoomStatusEnum.INPROGRESS
     });
-
-    // Pick a player in the room
-    // Initially lets pick the first player created in the room (the host)
-    // TODO: maybe enhance this to be a random player. We will need to preserve
-    // ordering of the rooms' players somehow between sessions / refreshes of
-    // the page
-    // Randomly select a player
-    // const startingPlayer = players[Math.floor(Math.random() * players.length)];
 
     // Create all the rounds for the game based on the rounds and players
     const roundsToCreate: Array<Partial<Round>> = new Array();
 
-    for (let roundIndex = 0; roundIndex < rounds; roundIndex++) {
+    for (let i = 0; i < room.rounds; i++) {
       players.forEach((player) => {
         const roundToCreate: Partial<Round> = {
-          roundIndex: roundIndex,
+          roundIndex: i,
           playerId: player.id,
-          roomId: roomId,
+          roomId: room.id,
           // provide date to enforce round ordering by createdDate
           createdDate: new Date()
         };
@@ -44,7 +47,39 @@ export const startRoom = async (
       });
     }
 
-    return await database.createManyRounds(roundsToCreate);
+    return await database.createManyRounds(supabaseClient, roundsToCreate);
+  } catch (e) {
+    console.error(e);
+    throw e;
+  }
+};
+
+export const endRoom = async (
+  supabaseClient: SupabaseClient,
+  oldRoom: Room
+): Promise<Room | null> => {
+  try {
+    if (oldRoom.status === RoomStatusEnum.COMPLETED) {
+      return oldRoom;
+    }
+
+    const existingRoom = await database.fetchRoom(
+      supabaseClient,
+      oldRoom.id,
+      undefined
+    );
+
+    if (existingRoom && existingRoom.status !== RoomStatusEnum.INPROGRESS) {
+      throw new Error('Room has not started');
+    }
+
+    // Put the room in a completed status
+    const newRoom = await database.updateRoom(supabaseClient, {
+      id: oldRoom.id,
+      status: RoomStatusEnum.COMPLETED
+    });
+
+    return newRoom;
   } catch (e) {
     console.error(e);
     throw e;
@@ -52,37 +87,37 @@ export const startRoom = async (
 };
 
 export const submitRound = async (
+  supabaseClient: SupabaseClient,
   roundId: string,
-  url: string,
+  phrase: string,
   response: ScreenshotResponse
 ): Promise<Round> => {
-
   try {
-
     const newRound: Partial<Round> = {
       id: roundId,
-      points: response.success ? url.length : -url.length,
-      phrase: url,
+      points: response.success ? phrase.length : -phrase.length,
+      phrase: phrase,
       image: `data:image/jpeg;charset=utl-8;base64,${response.image}`,
       result: response.success,
       submitted: true
     };
 
-    const result = await database.updateRound(newRound);
+    const result = await database.updateRound(supabaseClient, newRound);
 
     if (!result) {
-      throw new Error(`Updating round ${newRound.id} failed`)
+      throw new Error(`Updating round ${newRound.id} failed`);
     }
 
-    return result;
+    return result as Round;
   } catch (e) {
-    console.error(e)
+    console.error(e);
     throw e;
   }
-}
+};
 
 // Create a player for a room
 export const createPlayer = async (
+  supabaseClient: SupabaseClient,
   player: Partial<Player>
 ): Promise<Player | null> => {
   try {
@@ -99,6 +134,7 @@ export const createPlayer = async (
     }
 
     const roomHasPlayer = await database.fetchPlayerByUserIdAndRoomId(
+      supabaseClient,
       player.userId,
       player.roomId
     );
@@ -109,9 +145,9 @@ export const createPlayer = async (
       );
     }
 
-    let createdPlayer = await database.createPlayer(player);
+    let createdPlayer = await database.createPlayer(supabaseClient, player);
 
-    return createdPlayer;
+    return createdPlayer as Player | null;
   } catch (error) {
     console.log('error', error);
     throw error;

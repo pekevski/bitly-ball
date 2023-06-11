@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import Players from '../../components/Players';
 import { useStore } from '../../lib/Store';
 import Rounds from '../../components/Rounds';
 import { Page } from '../../components/Layout/Page';
@@ -9,11 +8,15 @@ import { getPlayerLocalStorage } from '../../lib/LocalStorage';
 import { Player } from '../../types/Player';
 import { Game } from '../../components/Game';
 import { Round } from '../../types/Round';
+import { endRoom } from '../../lib/Business';
+import { Room } from '../../types/Room';
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
 
 type RoomPageProps = {};
 
 const RoomPage: React.FC<RoomPageProps> = () => {
   const router = useRouter();
+  const supabaseClient = useSupabaseClient();
   const query = router.query;
   const roomId = query.id as string;
 
@@ -26,12 +29,6 @@ const RoomPage: React.FC<RoomPageProps> = () => {
   const [currentRound, setCurrentRound] = useState<Round | undefined>(
     undefined
   );
-
-  const [playerTurnId, setPlayerTurnId] = useState<string | undefined>(
-    undefined
-  );
-
-  const [roundIndex, setRoundIndex] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     // Get the current player from local storage if we revisit this
@@ -46,13 +43,33 @@ const RoomPage: React.FC<RoomPageProps> = () => {
 
   // When we revisit the room again, try and fetch all round information.
   useEffect(() => {
-    console.log('BITLYBALL: rounds has changed working round stuff out...', rounds);
+    console.log(
+      'BITLYBALL: rounds has changed working round stuff out...',
+      rounds
+    );
 
     // Get the current round and players turn from the list of rounds
     const currentRound = rounds.find((r) => r.submitted === false);
-    setPlayerTurnId(currentRound?.playerId);
-    setRoundIndex(currentRound?.roundIndex);
-    setCurrentRound(currentRound);
+
+    if (currentRound) {
+      setCurrentRound(currentRound);
+      console.log('results ->', { currentRound });
+    } else if (rounds.length) {
+      // All rounds are submitted, the game is over.
+      const _endGame = async (room: Room): Promise<void> => {
+        try {
+          await endRoom(supabaseClient, room);
+        } catch (e) {
+          // TODO Handle error when we cant update the room, maybe we put the
+          // phrase back and ask them to try again?
+          console.log('Error ending room', e);
+        }
+      };
+
+      if (room) {
+        _endGame(room);
+      }
+    }
   }, [rounds]);
 
   return (
@@ -60,38 +77,12 @@ const RoomPage: React.FC<RoomPageProps> = () => {
       <main className="h-full w-full">
         <div className="flex lg:flex-row flex-col h-full">
           <Container>
-            <div className="flex flex-col">
-              <div className="flex justify-between">
-                {!!room && (
-                  <div className="border-bottom-5">
-                    <h2>Status: {room.status}</h2>
-                    <h2>Rounds: {room.rounds}</h2>
-                    {currentRound && (
-                      <h2>Curent Round: {currentRound.roundIndex + 1}</h2>
-                    )}
-
-                    {/* Show the players of the game and ordering */}
-                    {currentPlayer && playerTurnId && (
-                      <Players
-                        players={players}
-                        currentPlayerId={currentPlayer.id}
-                        playerTurnId={playerTurnId}
-                      />
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-
             {room && currentPlayer && (
               <Game
                 room={room}
                 players={players}
-                rounds={rounds}
                 currentRound={currentRound}
                 currentPlayer={currentPlayer}
-                playerTurnId={playerTurnId}
-                roundIndex={roundIndex}
               />
             )}
           </Container>
@@ -100,8 +91,8 @@ const RoomPage: React.FC<RoomPageProps> = () => {
             <div className="p-5 h-full overflow-y-auto bg-gray-200">
               <Rounds
                 rounds={rounds}
+                players={players}
                 currentRound={currentRound}
-                roundIndex={roundIndex}
               />
             </div>
           </div>

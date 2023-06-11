@@ -1,12 +1,12 @@
 import NextLink from 'next/link';
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import clsx from 'clsx';
 
 type LinkProps = {
   href: string;
 };
 
-const Link: React.FC<LinkProps> = ({ children, href }) => {
+const Link: React.FC<PropsWithChildren<LinkProps>> = ({ children, href }) => {
   return (
     <NextLink href={href}>
       <a
