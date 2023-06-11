@@ -27,7 +27,7 @@ const RoomPage: React.FC<RoomPageProps> = () => {
   const [currentRound, setCurrentRound] = useState<Round | undefined>(
     undefined
   );
-  
+
   useEffect(() => {
     // Get the current player from local storage if we revisit this
     // page. Everytime we join a game as a user we store their info
@@ -41,19 +41,20 @@ const RoomPage: React.FC<RoomPageProps> = () => {
 
   // When we revisit the room again, try and fetch all round information.
   useEffect(() => {
-    console.log('BITLYBALL: rounds has changed working round stuff out...', rounds);
+    console.log(
+      'BITLYBALL: rounds has changed working round stuff out...',
+      rounds
+    );
 
     // Get the current round and players turn from the list of rounds
     const currentRound = rounds.find((r) => r.submitted === false);
 
     if (currentRound) {
       setCurrentRound(currentRound);
-      console.log("results ->", {currentRound} )
+      console.log('results ->', { currentRound });
     } else if (rounds.length) {
       // All rounds are submitted, the game is over.
-      const _endGame = async (
-        room: Room
-      ): Promise<void> => {
+      const _endGame = async (room: Room): Promise<void> => {
         try {
           await endRoom(room);
         } catch (e) {
@@ -67,7 +68,6 @@ const RoomPage: React.FC<RoomPageProps> = () => {
         _endGame(room);
       }
     }
-
   }, [rounds]);
 
   return (
@@ -75,7 +75,6 @@ const RoomPage: React.FC<RoomPageProps> = () => {
       <main className="h-full w-full">
         <div className="flex lg:flex-row flex-col h-full">
           <Container>
-
             {room && currentPlayer && (
               <Game
                 room={room}

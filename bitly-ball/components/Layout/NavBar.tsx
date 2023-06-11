@@ -1,16 +1,22 @@
-import { useUser } from '@supabase/supabase-auth-helpers/react';
 import Button from '../Button';
 import { useRouter } from 'next/router';
 import Link from '../Link';
+import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react';
 
 type NavBarProps = {};
 
 export const NavBar: React.FC<NavBarProps> = () => {
   const router = useRouter();
-  const { user, error } = useUser();
+  const supabaseClient = useSupabaseClient();
+  const user = useUser();
 
   const handleUsernameClick = () => {
     console.log('Clicked username');
+  };
+
+  const handleSignoutClick = async () => {
+    await supabaseClient.auth.signOut();
+    router.push('/');
   };
 
   return (
@@ -31,8 +37,9 @@ export const NavBar: React.FC<NavBarProps> = () => {
                 <Button disabled={false} handleClick={handleUsernameClick}>
                   {user?.email}
                 </Button>
-
-                <Link href={`/api/auth/logout`}>Sign out</Link>
+                <Button disabled={false} handleClick={handleSignoutClick}>
+                  Sign out
+                </Button>
               </>
             )}
           </div>

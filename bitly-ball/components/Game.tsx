@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { Round } from '../types/Round';
 import { ScreenshotResponse } from '../types/ScreenshotResponse';
 import { ImageMetadataResults } from './ImageMetadataResults';
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
 
 type GameProps = {
   currentPlayer: Player;
@@ -21,13 +22,14 @@ export const Game: React.FC<GameProps> = ({
   currentPlayer,
   room,
   players,
-  currentRound,
+  currentRound
 }) => {
+  const supabaseClient = useSupabaseClient();
   const [url, setUrl] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
-  const [imageResponse, setImageResponse] = useState<ScreenshotResponse | undefined>(
-    undefined
-  );
+  const [imageResponse, setImageResponse] = useState<
+    ScreenshotResponse | undefined
+  >(undefined);
 
   useEffect(() => {
     console.log('BITLY BALL => response changed..');
@@ -39,12 +41,7 @@ export const Game: React.FC<GameProps> = ({
         response: ScreenshotResponse
       ): Promise<void> => {
         try {
-          await submitRound(
-            currentRound.id,
-            url,
-            response
-          );
-
+          await submitRound(supabaseClient, currentRound.id, url, response);
         } catch (e) {
           // TODO Handle error when we cant update the round, maybe we put the
           // phrase back and ask them to try again?
@@ -55,7 +52,6 @@ export const Game: React.FC<GameProps> = ({
       console.log('BITLY BALL => response changed AND caused a create round');
       _submitRound(imageResponse);
     } else {
-
       // Response is undefined, if we have a current round lets
       // move on to the next round in the game.
       console.log('BITLY BALL => response is undefined');
@@ -65,7 +61,7 @@ export const Game: React.FC<GameProps> = ({
   }, [imageResponse]);
 
   const handleStartGame = () => {
-    startRoom(room, players);
+    startRoom(supabaseClient, room, players);
   };
 
   const gameInProgress = room.status === RoomStatusEnum.INPROGRESS;
@@ -104,7 +100,8 @@ export const Game: React.FC<GameProps> = ({
         {!currentPlayerTurn && (
           <div>
             <h3>
-              Waiting for {players.get(currentRound?.playerId || "none")?.name} to take their turn.
+              Waiting for {players.get(currentRound?.playerId || 'none')?.name}{' '}
+              to take their turn.
             </h3>
           </div>
         )}
@@ -128,17 +125,14 @@ export const Game: React.FC<GameProps> = ({
         )}
 
         {imageResponse && (
-          <ImageMetadataResults 
-            url={url}
-            imageResponse={imageResponse} 
-          />
+          <ImageMetadataResults url={url} imageResponse={imageResponse} />
         )}
       </>
     );
   }
 
   if (gameHasEnded) {
-    return <h1>GAME OVER</h1>
+    return <h1>GAME OVER</h1>;
   }
 
   return <h1>Something is wrong with the game. Please refresh.</h1>;

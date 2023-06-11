@@ -1,5 +1,6 @@
 // Handles all business logic
 // Only interfaces with Repository.ts
+import { SupabaseClient } from '@supabase/supabase-js';
 import { Player } from '../types/Player';
 import { Room, RoomStatusEnum } from '../types/Room';
 import { Round } from '../types/Round';
@@ -8,19 +9,23 @@ import * as database from './Repository';
 
 // Starts a room for all players when the host is ready to begin
 export const startRoom = async (
+  supabaseClient: SupabaseClient,
   room: Room,
   players: Map<string, Player>
 ): Promise<Array<Round> | null> => {
   try {
-
-    const existingRoom = await database.fetchRoom(room.id, undefined);
+    const existingRoom = await database.fetchRoom(
+      supabaseClient,
+      room.id,
+      undefined
+    );
 
     if (existingRoom && existingRoom.status !== RoomStatusEnum.CREATED) {
-      throw new Error("Room is already in progress")
+      throw new Error('Room is already in progress');
     }
 
     // Put the room in an inprogress status
-    await database.updateRoom({
+    await database.updateRoom(supabaseClient, {
       id: room.id,
       status: RoomStatusEnum.INPROGRESS
     });
@@ -42,7 +47,7 @@ export const startRoom = async (
       });
     }
 
-    return await database.createManyRounds(roundsToCreate);
+    return await database.createManyRounds(supabaseClient, roundsToCreate);
   } catch (e) {
     console.error(e);
     throw e;
@@ -50,22 +55,26 @@ export const startRoom = async (
 };
 
 export const endRoom = async (
-  oldRoom: Room,
+  supabaseClient: SupabaseClient,
+  oldRoom: Room
 ): Promise<Room | null> => {
   try {
-
     if (oldRoom.status === RoomStatusEnum.COMPLETED) {
       return oldRoom;
     }
 
-    const existingRoom = await database.fetchRoom(oldRoom.id, undefined);
+    const existingRoom = await database.fetchRoom(
+      supabaseClient,
+      oldRoom.id,
+      undefined
+    );
 
     if (existingRoom && existingRoom.status !== RoomStatusEnum.INPROGRESS) {
-      throw new Error("Room has not started")
+      throw new Error('Room has not started');
     }
 
     // Put the room in a completed status
-    const newRoom = await database.updateRoom({
+    const newRoom = await database.updateRoom(supabaseClient, {
       id: oldRoom.id,
       status: RoomStatusEnum.COMPLETED
     });
@@ -78,13 +87,12 @@ export const endRoom = async (
 };
 
 export const submitRound = async (
+  supabaseClient: SupabaseClient,
   roundId: string,
   phrase: string,
   response: ScreenshotResponse
 ): Promise<Round> => {
-
   try {
-
     const newRound: Partial<Round> = {
       id: roundId,
       points: response.success ? phrase.length : -phrase.length,
@@ -94,21 +102,22 @@ export const submitRound = async (
       submitted: true
     };
 
-    const result = await database.updateRound(newRound);
+    const result = await database.updateRound(supabaseClient, newRound);
 
     if (!result) {
-      throw new Error(`Updating round ${newRound.id} failed`)
+      throw new Error(`Updating round ${newRound.id} failed`);
     }
 
     return result;
   } catch (e) {
-    console.error(e)
+    console.error(e);
     throw e;
   }
-}
+};
 
 // Create a player for a room
 export const createPlayer = async (
+  supabaseClient: SupabaseClient,
   player: Partial<Player>
 ): Promise<Player | null> => {
   try {
@@ -125,6 +134,7 @@ export const createPlayer = async (
     }
 
     const roomHasPlayer = await database.fetchPlayerByUserIdAndRoomId(
+      supabaseClient,
       player.userId,
       player.roomId
     );
@@ -135,7 +145,7 @@ export const createPlayer = async (
       );
     }
 
-    let createdPlayer = await database.createPlayer(player);
+    let createdPlayer = await database.createPlayer(supabaseClient, player);
 
     return createdPlayer;
   } catch (error) {

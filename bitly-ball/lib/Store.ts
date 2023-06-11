@@ -2,14 +2,16 @@ import { useState, useEffect } from 'react';
 import { Player } from '../types/Player';
 import { Round } from '../types/Round';
 import { Room } from '../types/Room';
-import { supabase } from './SupbaseConfig';
 import { fetchPlayers, fetchRoom, fetchRounds } from './Repository';
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
+import { Database } from './database.types';
 
 type StoreProps = {
   roomId: string | undefined;
 };
 
 export const useStore = (props: StoreProps) => {
+  const supabaseClient = useSupabaseClient<Database>();
   const [room, setRoom] = useState<Room | undefined>(undefined);
   const [players, setPlayers] = useState<Map<string, Player>>(new Map());
   const [rounds, setRounds] = useState<Round[]>([]);
@@ -44,27 +46,65 @@ export const useStore = (props: StoreProps) => {
     // fetchChannels(setChannels)
 
     // Listen for new and deleted rooms
-    const roomListener = supabase
-      .from<Room>('room') // TODO: improve listener `room:id=eq.${props.roomId}`)
-      .on('INSERT', (payload) => handleNewRoom(payload.new))
-      .on('UPDATE', (payload) => handleUpdatedRoom(payload.new))
-      // .on('DELETE', (payload) => handleDeletedRoom(payload.old))
+    const roomListener = supabaseClient
+      .channel('table-db-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'room'
+        },
+        (payload) => handleNewRoom(payload.new)
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'room'
+        },
+        (payload) => handleUpdatedRoom(payload.new)
+      )
       .subscribe();
 
     // Listen for changes to our players
-    const playerListener = supabase
-      .from<Player>('player') // TODO: improve listener `player:roomId=eq.${props.roomId}`)
-      .on('INSERT', (payload) => handleNewPlayer(payload.new))
-      // .on('UPDATE', (payload) => handleUpdatedPlayer(payload.new))
-      // .on('DELETE', (payload) => handleDeletedPlayer(payload.old))
+    // TODO: improve listener `player:roomId=eq.${props.roomId}`)
+    const playerListener = supabaseClient
+      .channel('table-db-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'player'
+        },
+        (payload) => handleNewPlayer(payload.new)
+      )
       .subscribe();
 
     // Listen for new and deleted rounds
-    const roundListener = supabase
-      .from<Round>('round') // TODO: improve listener `round:roomId=eq.${props.roomId}`)
-      .on('INSERT', (payload) => handleNewRound(payload.new))
-      .on('UPDATE', (payload) => handleUpdatedRound(payload.new))
-      // .on('DELETE', (payload) => handleDeletedRound(payload.old))
+    // TODO: improve listener `round:roomId=eq.${props.roomId}`)
+    const roundListener = supabaseClient
+      .channel('table-db-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'round'
+        },
+        (payload) => handleNewRound(payload.new)
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'round'
+        },
+        (payload) => handleUpdatedRound(payload.new)
+      )
       .subscribe();
 
     // Cleanup on unmount
@@ -79,17 +119,17 @@ export const useStore = (props: StoreProps) => {
   // Update when the room changes
   useEffect(() => {
     if (props?.roomId) {
-      fetchRoom(props.roomId, setRoom);
-      fetchPlayers(props.roomId, (input: Player[]) => {
+      fetchRoom(supabaseClient, props.roomId, setRoom);
+      fetchPlayers(supabaseClient, props.roomId, (input: Player[]) => {
         const result = new Map();
 
         input.forEach((p) => {
           result.set(p.id, p);
-        })
+        });
 
-        setPlayers(result)
+        setPlayers(result);
       });
-      fetchRounds(props.roomId, setRounds);
+      fetchRounds(supabaseClient, props.roomId, setRounds);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.roomId]);
@@ -131,7 +171,7 @@ export const useStore = (props: StoreProps) => {
       // find the round in our list of rounds and update it
       const roundsCopy = [...rounds];
       let roundCopyIndex = roundsCopy.findIndex(
-        (r) => (r.id === updatedRound.id)
+        (r) => r.id === updatedRound.id
       );
 
       if (roundCopyIndex > -1) {
