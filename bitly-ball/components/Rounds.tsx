@@ -32,6 +32,7 @@ const Rounds: React.FC<RoundsProps> = ({
     return <Loader />;
   }
   
+
   return (
     <>
 
@@ -40,32 +41,32 @@ const Rounds: React.FC<RoundsProps> = ({
             <tr>
               <th colSpan={4}>Totals</th>
             </tr>
-            {Array.from(totals.entries()).map((totalData) => (
-                <tr key={"total"+ totalData[0]}>
+            {Array.from(totals.entries()).map(([playerId, score]) => (
+                <tr key={"total"+ playerId}>
                   <td colSpan={3}>
-                    {players.get(totalData[0])?.isHost ? '👑' : '👤'} {players.get(totalData[0])?.name}
+                    <div className={'flex flex-row items-center gap-x-2'}>
+                      <h1 className={"text-xl text-gray-900 leading-tight"}>{players.get(playerId)?.name}</h1>
+                      {players.get(playerId)?.isHost && <Pill label="Host" color="bg-blue-500" />}
+                    </div>
                   </td>
-                  <td className='text-right'>{totalData[1].toString()}</td>
+                  <td className='text-right'>{score.toString()}</td>
                 </tr>
             ))}
           </tbody>
-        {Array.from(data.entries()).map((playerData, index) => (
-          <tbody key={playerData[0]}>
+        {Array.from(data.entries()).map(([playerId, rounds], index) => (
+          <tbody key={playerId}>
             <tr>
               <th colSpan={4}>Round {index + 1}</th>
             </tr>
-            {playerData[1]
-              .map((round) => (
-                <tr key={round.id}>
-                  <td>{currentRound?.id === round.id ? "✨" : ""} {players.get(round.playerId)?.isHost ? '👑' : '👤'} {players.get(round.playerId)?.name}</td>
-                  <td>{round.phrase}</td>
-                  <td className='text-center'>
-                    {round.image && <img src={round.image} width={200} height={100} /> }
-                  </td>
-                  <td className='text-right'>{round.points.toString()}</td>
-                </tr>
-              )
-            )}
+            <tr>
+              <td className="flex flex-row flex-wrap basis-1/2">
+              {rounds
+                .map((round) => (
+                  <RoundResultItem key={round.id} round={round} player={players.get(round.playerId)} />
+                )
+              )}
+              </td>
+            </tr>
           </tbody>
         ))}
 
@@ -75,6 +76,44 @@ const Rounds: React.FC<RoundsProps> = ({
   );
   
 };
+
+interface PillProps {
+  label: string,
+  color: string
+}
+
+const Pill = (props: PillProps) => {
+  return (
+    <span className={"px-2 py-1 text-white text-sm rounded-full " + props.color}>
+      {props.label}
+    </span>
+  )
+}
+
+interface RoundResultItemProps {
+  round: Round,
+  player?: Player
+}
+
+const RoundResultItem = (props: RoundResultItemProps) => {
+
+  const {round, player} = props;
+
+  if (!player) {
+    return null
+  }
+
+  return (
+    <div className={"rounded-lg shadow-lg bg-gray-600 w-full h-64 p-3 antialiased bg-no-repeat bg-cover"} style={{backgroundImage: `url(${round.image})`, backgroundBlendMode: 'overlay'}} >
+      <Pill label={player.name} color={'bg-gray-600'} />
+      <div className={"w-full p-3 flex flex-col"}>
+        {round.submitted && <h2 className={"text-2xl text-gray-900 leading-tight"}>{round.phrase}</h2>}
+        {round.submitted && <h2 className={"text-2xl text-gray-900 leading-tight"}>{round.points.toString()}</h2>}
+      </div>
+    </div>
+  )
+}
+
 
 interface DataResult {
   result: Map<number, Round[]>;
