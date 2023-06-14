@@ -1,11 +1,12 @@
 export type Round = {
-    id: string,
-    round: number,
-    playerId: string,
-    roomId: string,
-    points: number,
-    phrase: string,
-    created_at: Date,
-    result: boolean,
-    image: string;
-}
+  id: string;
+  roundIndex: number;
+  playerId: string;
+  roomId: string;
+  points: number;
+  phrase: string;
+  createdDate: Date;
+  result: boolean;
+  image: string;
+  submitted: boolean;
+};

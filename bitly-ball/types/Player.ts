@@ -1,6 +1,7 @@
 export type Player = {
-    id: string,
-    name: string,
-    roomId: string,
-    isHost: boolean
-}
+  id: string;
+  name: string;
+  roomId: string;
+  isHost: boolean;
+  userId: string;
+};

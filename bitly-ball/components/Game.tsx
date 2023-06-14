@@ -1,138 +1,139 @@
-import { Player } from "../types/Player";
-import { Room, RoomStatusEnum } from "../types/Room";
-import BitlyImage from "./BitlyImage";
-import Button from "./Button";
-import TextInput from "./TextInput";
-import { createRound, startRoom } from "../lib/Repository";
-import React, { useEffect, useState } from "react";
-import { Round } from "../types/Round";
-import { ScreenshotResponse } from "../types/ScreenshotResponse";
+import { Player } from '../types/Player';
+import { Room, RoomStatusEnum } from '../types/Room';
+import BitlyImage from './BitlyImage';
+import Button from './Button';
+import TextInput from './TextInput';
+import { submitRound } from '../lib/Business';
+import { startRoom } from '../lib/Business';
+import React, { useEffect, useState } from 'react';
+import { Round } from '../types/Round';
+import { ScreenshotResponse } from '../types/ScreenshotResponse';
+import { ImageMetadataResults } from './ImageMetadataResults';
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
 
 type GameProps = {
   currentPlayer: Player;
   room: Room;
-  players: Player[];
-  rounds: Round[];
+  players: Map<string, Player>;
+  currentRound?: Round;
 };
 
 export const Game: React.FC<GameProps> = ({
   currentPlayer,
   room,
   players,
-  rounds,
+  currentRound
 }) => {
-  const [url, setUrl] = useState<string>("");
+  const supabaseClient = useSupabaseClient();
+  const [url, setUrl] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
-  const [response, setResponse] = useState<ScreenshotResponse | undefined>(
-    undefined
-  );
+  const [imageResponse, setImageResponse] = useState<
+    ScreenshotResponse | undefined
+  >(undefined);
 
   useEffect(() => {
-    console.log("BITLY BALL => response changed..");
-    // TODO: check if round for this data already exists?
-    if (response) {
-      const _createRound = async (
+    console.log('BITLY BALL => response changed..');
+    // We got a image response lets update the current round
+    // with the resulting data of the response.
+    // Calculate points, calculate round.
+    if (imageResponse && currentRound) {
+      const _submitRound = async (
         response: ScreenshotResponse
       ): Promise<void> => {
         try {
-          const currentRound: Partial<Round> = {
-            playerId: "1f274bc7-a4bb-44c2-b180-6c4b054e36fe",
-            roomId: room.id,
-            points: url.length,
-            phrase: url,
-            image: `data:image/jpeg;charset=utl-8;base64,${response.image}`,
-            result: !!response.success,
-          };
-
-          await createRound(currentRound);
+          await submitRound(supabaseClient, currentRound.id, url, response);
         } catch (e) {
-          console.log("Error creating round", e);
+          // TODO Handle error when we cant update the round, maybe we put the
+          // phrase back and ask them to try again?
+          console.log('Error creating round', e);
         }
       };
 
-      console.log("BITLY BALL => response changed AND cause a create round");
-      _createRound(response);
+      console.log('BITLY BALL => response changed AND caused a create round');
+      _submitRound(imageResponse);
+    } else {
+      // Response is undefined, if we have a current round lets
+      // move on to the next round in the game.
+      console.log('BITLY BALL => response is undefined');
+      // Do we need to do anything, replication should know this since rounds
+      // have changed....
     }
-  }, [response]);
-
-  const handleNextRound = () => {
-    console.log("BITLY => Handle Try Again");
-    setUrl("");
-    setResponse(undefined);
-  };
+  }, [imageResponse]);
 
   const handleStartGame = () => {
-    console.log("BITLY => Starting Room");
-    startRoom(room.id);
+    startRoom(supabaseClient, room, players);
   };
 
-  const gameInProgress = room?.status === RoomStatusEnum.INPROGRESS;
-  const gameReadyToStart = room?.status === RoomStatusEnum.CREATED;
-  const canStart = players.length > 1;
+  const gameInProgress = room.status === RoomStatusEnum.INPROGRESS;
+  const gameReadyToStart = room.status === RoomStatusEnum.CREATED;
+  const gameHasEnded = room.status === RoomStatusEnum.COMPLETED;
+  const currentPlayerTurn = currentPlayer?.id === currentRound?.playerId;
+  const canStart = players.size > 1;
+
+  if (gameReadyToStart) {
+    return (
+      <>
+        {currentPlayer.isHost && (
+          <div className="py-5 align-bottom">
+            <Button
+              width={'full'}
+              handleClick={handleStartGame}
+              disabled={!canStart}
+            >
+              {canStart ? 'Start Room' : 'Waiting for Players to Join'}
+            </Button>
+          </div>
+        )}
+
+        {!currentPlayer.isHost && (
+          <div className="py-5 align-bottom">
+            <h2>Have a drink while you wait...🍸🍻🥂🍷🥃</h2>
+          </div>
+        )}
+      </>
+    );
+  }
 
   if (gameInProgress) {
     return (
       <>
+        {!currentPlayerTurn && (
+          <div>
+            <h3>
+              Waiting for {players.get(currentRound?.playerId || 'none')?.name}{' '}
+              to take their turn.
+            </h3>
+          </div>
+        )}
+
+        {currentPlayerTurn && (
+          <div className="p-5 align-bottom">
+            <TextInput handleSubmit={setUrl} loading={loading} />
+          </div>
+        )}
+
         {url && url.length && (
           <div className="p-5">
             <BitlyImage
               url={url}
               width={1000}
               height={600}
-              handleSuccess={setResponse}
+              handleSuccess={setImageResponse}
               handleLoading={setLoading}
             />
           </div>
         )}
 
-        {!response && (
-          <div className="p-5 align-bottom">
-            <TextInput handleSubmit={setUrl} loading={loading} />
-          </div>
-        )}
-
-        {!!response && (
-          <div className="align-bottom bg-gray-100 p-5">
-            <div className="flex sm:flex-row justify-between pb-5">
-              <h4>
-                {response.success ? "200 OK Success!" : "404 Fail!"}{" "}
-                {response.success ? "+" : "-"}
-                {url.length} points
-              </h4>
-              <h4>{response.url}</h4>
-            </div>
-            <Button handleClick={handleNextRound} disabled={false}>
-              Next Round
-            </Button>
-          </div>
+        {imageResponse && (
+          <ImageMetadataResults url={url} imageResponse={imageResponse} />
         )}
       </>
     );
   }
 
-  if (gameReadyToStart) {
-    return (
-      <>
-        <div>
-          <h1 className="text-center">Game Lobby</h1>
-        </div>
-
-        {currentPlayer.isHost && (
-          <div className="p-5 align-bottom">
-            <Button handleClick={handleStartGame} disabled={!canStart}>
-              {canStart ? "Start Room" : "Waiting for Players to Join"}
-            </Button>
-          </div>
-        )}
-
-        {!currentPlayer.isHost && (
-          <div className="p-5 align-bottom">
-            <h2>Waiting for host</h2>
-          </div>
-        )}
-      </>
-    );
+  if (gameHasEnded) {
+    return <h1>GAME OVER</h1>;
   }
 
-  return <h1>Something is wrong with the game.</h1>;
+  return <h1>Something is wrong with the game. Please refresh.</h1>;
 };

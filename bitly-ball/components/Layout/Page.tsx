@@ -1,11 +1,28 @@
-import React from "react";
+import React, { PropsWithChildren } from 'react';
+import { NavBar } from './NavBar';
+import Head from 'next/head';
 
-type PageProps = {}
+type PageProps = {
+  title?: string;
+};
 
-export const Page: React.FC<PageProps> = ({children}) => {
-    return (
-        <div className="flex flex-col min-h-screen h-screen items-center">
-            {children}
-        </div>
-    )
-}
+export const Page: React.FC<PropsWithChildren<PageProps>> = ({
+  title,
+  children
+}) => {
+  return (
+    <>
+      {/* Head content TODO: improve me for metadata tags... */}
+      <Head>
+        <title>{title || '⚽ Bitly Ball'}</title>
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+
+      {/* Navigation */}
+      <NavBar />
+
+      {/* Page content */}
+      <div className="mx-auto max-w-6xl px-6">{children}</div>
+    </>
+  );
+};
